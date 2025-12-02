@@ -1,0 +1,39 @@
+extends ../layout/index
+
+block contenido
+
+    h1 MarketPlace
+        span OLX
+    h2 tituloPagina
+
+    if errores
+        div
+            each error in errores
+                p= error.msg
+
+    form(method="POST" action="registro" noValidate)
+        input(type="hidden" name="_csrf" value=csrfToken )
+    
+        label(for="nombre") Nombre
+        input#nombre(type="text" name="nombre" )
+
+    
+        label(for="email") Email
+        input#email(type="email" name="email" )
+
+    
+        label(for="password") Contraseña
+        input#password(type="password" name="password")
+
+    
+        label(for="passwordConfirm") Confirmar contraseña
+        input#passwordConfirm(type="password" name="repeat_password" )
+
+    
+        label(for="role") Rol
+        select#role(name="role")
+            option(value="") Selecciona un rol
+            option(value="admin") Admin
+            option(value="cliente") Cliente
+
+        button(type="submit") Registrarme

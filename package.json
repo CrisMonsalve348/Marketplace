@@ -12,10 +12,18 @@
   },
   "license": "ISC",
   "author": "",
-  "type": "commonjs",
+  "type": "module",
   "main": "index.js",
   "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "styles": "concurrently \"npm run css\" \"npm run js\"",
+    "css": "npx @tailwindcss/cli -i ./public/css/input.css -o ./public/css/style.css --watch",
+    "js": "webpack --watch",
+    "db:importar": "node ./seed/seeder.js -i",
+    "db:eliminar": "node ./seed/seeder.js -e",
     "test": "echo \"Error: no test specified\" && exit 1"
+    
   },
   "dependencies": {
     "bcrypt": "^6.0.0",

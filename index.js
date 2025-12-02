@@ -2,8 +2,7 @@
 import express from "express";
 import csurf from "csurf";
 import cookieParser from "cookie-parser";
-
-
+import userRoutes from "./routes/userRoutes.js";
 import db from "./config/db.js";
 
 // Crear APP
@@ -35,7 +34,7 @@ app.set("views", "./views");
 app.use(express.static("public"));
 
 // Routing
-
+app.use("/auth", userRoutes);
 // Definir el puerto
 const port = process.env.PORT || 3000;
 
