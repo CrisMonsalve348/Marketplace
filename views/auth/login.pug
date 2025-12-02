@@ -1,1 +1,30 @@
+extends ../layout/index
 
+block contenido
+    h1 MarketPlace
+        span OLX
+    h2 tituloPagina
+
+    if errores
+        div
+            each error in errores
+                p= error.msg
+
+    form(action="login" method="POST")
+        input(type="hidden" name="_csrf" value=csrfToken )
+            
+            
+        label(for="email" class="block text-lg font-bold mb-2") Correo electrónico
+        input#email(type="email" name="email" placeholder="Tu correo")
+
+            
+        label(for="password" class="block text-lg font-bold mb-2") Contraseña
+        input#password(type="password" name="password" placeholder="Tu contraseña" )
+
+        button(type="submit" ) Iniciar Sesión
+
+        
+    p ¿No tienes cuenta?
+    a(href="registro") Regístrate
+    p ¿Olvidaste tu contraseña?
+    a(href="olvide-password") Recuperar contraseña

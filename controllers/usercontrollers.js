@@ -130,13 +130,44 @@ const confirmar = async (req, res) => {
   });
 };
 
+const formularioLogin = (req, res) => {
+  res.render("auth/login", {
+    tituloPagina: "Inicio de Sesión",
+    csrfToken: req.csrfToken(),
+  });
+};
 
+const autenticar= async(req,res)=>{
+//validacion
+ await check("email")
+    .isEmail()
+    .withMessage("El correo es obligatorio")
+    .run(req);
 
+  await check("password")
+    .notEmpty()
+    .withMessage("La contraseña no puede estar vacia")
+    .run(req);
 
+  let resultado = validationResult(req);
+
+  // Verificar que el resultado este vacio
+  if (!resultado.isEmpty()) {
+    // Errores
+    return res.render("auth/login", {
+      tituloPagina: "Iniciar Sesion",
+      errores: resultado.array(),
+      csrfToken: req.csrfToken(),
+    });
+  }
+
+}
 
 export {
 
     formularioRegistro,
     registrar,
-    confirmar
+    confirmar,
+    formularioLogin,
+    autenticar
 }

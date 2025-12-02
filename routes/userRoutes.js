@@ -2,7 +2,9 @@ import express from "express";
 import {
     formularioRegistro,
     registrar,
-    confirmar
+    confirmar,
+    formularioLogin,
+    autenticar
 } from "../controllers/usercontrollers.js"
 
 const router = express.Router();
@@ -12,5 +14,9 @@ router.post("/registro", registrar );
 
 // Confirmar Cuenta
 router.get("/confirmar/:token", confirmar);
+
+//login 
+router.get("/login", formularioLogin);
+router.post("/login", autenticar);
 
 export default router;
