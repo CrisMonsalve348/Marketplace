@@ -1,0 +1,14 @@
+
+extends ../layout/index
+
+block contenido
+    
+    h1 MarketPlaceOLX 
+            
+    h2=tituloPagina
+
+    div
+        p class= mensaje 
+
+        if !error
+            a(href="/auth/login") Ya puedes iniciar sesion

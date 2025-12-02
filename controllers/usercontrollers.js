@@ -1,6 +1,8 @@
 import { check, validationResult } from "express-validator";
 import bcrypt from "bcrypt";
-
+import { generarId} from "../helpers/token.js";
+import Usuario from "../models/Usuario.js";
+import { emailRegistro, emailOlvidePassword } from "../helpers/email.js";
 
 
 
@@ -56,17 +58,85 @@ const registrar = async(req, res) =>{
       usuario: {
         nombre: req.body.nombre,
         email: req.body.email,
-        role: req.body.role
+        
+      },
+    });
+  }
+    // Extraer los datos
+  const { nombre, email, password, role } = req.body;
+
+  // Validar que el usuario no exista
+  const existeUsuario = await Usuario.findOne({
+    where: { email },
+  });
+  if (existeUsuario) {
+    return res.render("auth/registro", {
+      tituloPagina: "Registro de Usuario",
+      csrfToken: req.csrfToken(),
+      errores: [{ msg: "El usuario ya existe" }],
+      usuario: {
+        nombre: req.body.nombre,
+        email: req.body.email,
       },
     });
   }
 
+  const usuarios = await Usuario.create({
+    nombre,
+    email,
+    password,
+    role,
+    token: generarId(),
+  });
 
-}
+  // Enviar el email
+  emailRegistro({
+    nombre: usuarios.nombre,
+    email: usuarios.email,
+    token: usuarios.token,
+  });
+
+  // Mostrar mensaje de Confirmación
+  res.render("templates/mensaje", {
+    tituloPagina: "Cuenta Creada",
+    mensaje: "Se ha enviado un correo de confirmación, Da clic en el enlace.",
+  });
+};
+
+// Funcion que va a confirmar el correo
+const confirmar = async (req, res) => {
+  const { token } = req.params;
+
+  // Validar el token sea verdadero
+  const usuario = await Usuario.findOne({ where: { token } });
+
+  // Confirmar la cuenta
+  if (!usuario) {
+    return res.render("auth/confirmar-cuenta", {
+      tituloPagina: "Error al crear cuenta",
+      mensaje: "Hubo un error al confirmar tu cuenta, Intentalo de nuevo",
+      error: true,
+    });
+  }
+
+  //Validar la informacion y mandarla a la DB
+  usuario.token = null;
+  usuario.confirmado = true;
+  await usuario.save();
+
+  res.render("auth/confirmar-cuenta", {
+    tituloPagina: "Cuenta confirmada",
+    mensaje: "La cuenta se confirmó correctamente",
+  });
+};
+
+
+
 
 
 export {
 
     formularioRegistro,
-    registrar
+    registrar,
+    confirmar
 }
