@@ -10,7 +10,7 @@ import { emailRegistro, emailOlvidePassword } from "../helpers/email.js";
 
 
 const formularioRegistro = (req, res) => {
-  console.log(req.csrfToken());
+  
   res.render("auth/registro", {
     tituloPagina: "Registro de Usuario",
     csrfToken: req.csrfToken(),
@@ -334,6 +334,59 @@ const nuevoPassword = async (req, res) => {
   });
 };
 
+
+//editar perfil 
+
+const formularioeditarperfil=(req, res)=>{
+  
+  res.render("auth/editar-perfil", {
+    tituloPagina: "Editar perfil de usuario",
+    csrfToken: req.csrfToken(),
+     usuario: req.usuario 
+  });   
+
+};
+
+const cambiarnombre = async (req, res) => {
+
+  // VALIDAR
+  await check("nombre")
+    .notEmpty()
+    .withMessage("El nombre no puede estar vacío")
+    .run(req);
+
+  const resultado = validationResult(req);
+
+  if (!resultado.isEmpty()) {
+    return res.render("auth/editar-perfil", {
+      tituloPagina: "Editar perfil",
+      csrfToken: req.csrfToken(),
+      errores: resultado.array(),
+      usuario: req.usuario   
+    });
+  }
+
+  try {
+    const usuario = await Usuario.findByPk(req.usuario.id);
+
+    usuario.nombre = req.body.nombre; // cambiar nombre
+    await usuario.save();             // guardar
+
+    // Actualizar la sesión para que el nombre también cambie en las vistas
+    req.usuario.nombre = req.body.nombre;
+    res.locals.usuario.nombre = req.body.nombre;
+
+    return res.render("templates/mensaje", {
+      tituloPagina: "Perfil Actualizado",
+      mensaje: "Tu nombre ha sido actualizado correctamente"
+    });
+
+  } catch (error) {
+    console.log(error);
+    return res.redirect("/dashboard");
+  }
+};
+
 export {
 
     formularioRegistro,
@@ -344,5 +397,7 @@ export {
     formularioOlvidePassword,
     resetPassword,
     comprobarToken,
-    nuevoPassword
+    nuevoPassword,
+    formularioeditarperfil,
+    cambiarnombre
 }

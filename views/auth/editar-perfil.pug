@@ -1,0 +1,23 @@
+extends ../layout/index
+
+block contenido
+
+    h1 MarketPlace
+        span OLX
+    h2 tituloPagina
+
+    if errores
+        div
+            each error in errores
+                p= error.msg
+
+    form(method="POST" action="editar-perfil" noValidate)
+        input(type="hidden" name="_csrf" value=csrfToken )
+    
+        label(for="nombre") Nombre
+        input#nombre(type="text" name="nombre" placeholder=usuario.nombre)
+
+
+         
+
+        button(type="submit") Cambiar datos

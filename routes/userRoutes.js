@@ -8,8 +8,11 @@ import {
     formularioOlvidePassword,
     resetPassword,
     comprobarToken,
-    nuevoPassword
+    nuevoPassword,
+    formularioeditarperfil,
+    cambiarnombre
 } from "../controllers/usercontrollers.js"
+import protegerRuta  from "../middleware/protegerruta.js"
 
 const router = express.Router();
 //registro
@@ -31,4 +34,11 @@ router.post("/olvide-password", resetPassword);
 //recuperar contraseña
 router.get("/reset-password/:token", comprobarToken);
 router.post("/reset-password/:token", nuevoPassword);
+
+//editar perfil
+router.get("/editar-perfil",protegerRuta, formularioeditarperfil );
+router.post("/editar-perfil", protegerRuta, cambiarnombre);
+
+
+
 export default router;
