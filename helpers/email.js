@@ -58,7 +58,7 @@ const emailOlvidePassword = async (datos) => {
     <p>Restaura tu contraseña en el siguiente enlace: 
     <a href="${process.env.BACKEND_URL}:${
       process.env.PORT ?? 3000
-    }/auth/olvide-password/${token}">Restablecer</a> </p>
+    }/auth/reset-password/${token}">Restablecer</a> </p>
 
     <p>Si no pediste restablecer, Ignora el mensaje</p>
     `,
