@@ -4,12 +4,13 @@ import{
 
 
 } from "../controllers/appcontrollers.js";
+import identificarUsuario from "../middleware/identificarUsuario.js";  
 
 const router = express.Router();
 
 
 //dashboard
-router.get("/dashboard", inicio);
+router.get("/dashboard", identificarUsuario, inicio);
 
 
 export default router

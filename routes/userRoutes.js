@@ -10,7 +10,8 @@ import {
     comprobarToken,
     nuevoPassword,
     formularioeditarperfil,
-    cambiarnombre
+    cambiarnombre,
+    logout
 } from "../controllers/usercontrollers.js"
 import protegerRuta  from "../middleware/protegerruta.js"
 
@@ -38,6 +39,10 @@ router.post("/reset-password/:token", nuevoPassword);
 //editar perfil
 router.get("/editar-perfil",protegerRuta, formularioeditarperfil );
 router.post("/editar-perfil", protegerRuta, cambiarnombre);
+
+//cerrar sesion 
+router.get("/logout", protegerRuta, logout);
+
 
 
 

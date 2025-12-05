@@ -201,8 +201,7 @@ const autenticar= async(req,res)=>{
   return res
     .cookie("_token", token, {
       httpOnly: true,
-      // secure: true,
-      // sameSite: true
+      
     })
     .redirect("/dashboard");
 
@@ -382,10 +381,22 @@ const cambiarnombre = async (req, res) => {
     });
 
   } catch (error) {
-    console.log(error);
-    return res.redirect("/dashboard");
+    console.log(error); 
+      return res.render("templates/mensaje", {
+      tituloPagina: "Error al actualizar",
+      mensaje: "Hubo un error al actualizar tu nombre"
+    });
   }
 };
+
+
+//cerrar sesion 
+const logout = (req, res) => {
+    res.clearCookie("_token");
+    return res.redirect("/auth/login");
+};
+
+
 
 export {
 
@@ -399,5 +410,6 @@ export {
     comprobarToken,
     nuevoPassword,
     formularioeditarperfil,
-    cambiarnombre
+    cambiarnombre,
+    logout
 }
