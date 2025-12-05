@@ -397,6 +397,17 @@ const logout = (req, res) => {
 };
 
 
+//gestionar usuarios del admin
+const vistadegestiondeusuarios=(req, res)=>{
+
+return res.render("auth/gestionar-usuarios",{
+  tituloPagina: "Gestion de Usuarios",
+    csrfToken: req.csrfToken()
+})
+
+}
+
+
 
 export {
 
@@ -411,5 +422,6 @@ export {
     nuevoPassword,
     formularioeditarperfil,
     cambiarnombre,
-    logout
-}
+    logout,
+    vistadegestiondeusuarios
+  }

@@ -11,9 +11,11 @@ import {
     nuevoPassword,
     formularioeditarperfil,
     cambiarnombre,
-    logout
+    logout,
+    vistadegestiondeusuarios
 } from "../controllers/usercontrollers.js"
 import protegerRuta  from "../middleware/protegerruta.js"
+import protegerRutaadmin  from "../middleware/protegerrutaadmin.js"
 
 const router = express.Router();
 //registro
@@ -44,6 +46,8 @@ router.post("/editar-perfil", protegerRuta, cambiarnombre);
 router.get("/logout", protegerRuta, logout);
 
 
+//gestionar usuarios del admin
+router.get("/gestionar-usuarios", protegerRutaadmin,vistadegestiondeusuarios)
 
 
 export default router;
