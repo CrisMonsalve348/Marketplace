@@ -20,8 +20,8 @@
     "styles": "concurrently \"npm run css\" \"npm run js\"",
     "css": "npx @tailwindcss/cli -i ./public/css/input.css -o ./public/css/style.css --watch",
     "js": "webpack --watch",
-    "db:importar": "node ./seed/seeder.js -i",
-    "db:eliminar": "node ./seed/seeder.js -e",
+    "db:importar": "node ./seeders/seeder.js -i",
+    "db:eliminar": "node ./seeders/seeder.js -e",
     "test": "echo \"Error: no test specified\" && exit 1"
     
   },

@@ -1,0 +1,15 @@
+extends ../layout/index
+
+block contenido 
+    if mensaje
+        div(class="bg-green-500 text-white font-bold p-3 rounded mb-4")
+            p= mensaje
+    each usuario in usuarios
+        div.usuario
+            p Nombre: #{usuario.nombre}
+            p Email: #{usuario.email}
+            p Rol: #{usuario.role}
+            form(method="POST" action='gestionar-usuarios' noValidate)
+                input(type="hidden" name="_csrf" value=csrfToken )
+                input(type="hidden" name="usuarioId" value=usuario.id)
+                button(type="submit") Eliminar Usuario

@@ -12,7 +12,8 @@ import {
     formularioeditarperfil,
     cambiarnombre,
     logout,
-    vistadegestiondeusuarios
+    vistadegestiondeusuarios,
+    eliminarusuario
 } from "../controllers/usercontrollers.js"
 import protegerRuta  from "../middleware/protegerruta.js"
 import protegerRutaadmin  from "../middleware/protegerrutaadmin.js"
@@ -48,6 +49,7 @@ router.get("/logout", protegerRuta, logout);
 
 //gestionar usuarios del admin
 router.get("/gestionar-usuarios", protegerRutaadmin,vistadegestiondeusuarios)
+router.post("/gestionar-usuarios", protegerRutaadmin, eliminarusuario)
 
 
 export default router;

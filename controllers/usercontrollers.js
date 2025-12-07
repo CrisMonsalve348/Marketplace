@@ -3,6 +3,8 @@ import bcrypt from "bcrypt";
 import { generarId, generarJWT} from "../helpers/token.js";
 import Usuario from "../models/Usuario.js";
 import { emailRegistro, emailOlvidePassword } from "../helpers/email.js";
+import { Op } from "sequelize";
+
 
 
 
@@ -398,15 +400,78 @@ const logout = (req, res) => {
 
 
 //gestionar usuarios del admin
-const vistadegestiondeusuarios=(req, res)=>{
+const vistadegestiondeusuarios= async (req, res)=>{
+const usuarios = await Usuario.findAll({
+      where: { id: { [Op.ne]: req.usuario.id } } 
+    });
+try{
 
-return res.render("auth/gestionar-usuarios",{
-  tituloPagina: "Gestion de Usuarios",
-    csrfToken: req.csrfToken()
-})
 
+
+  return res.render("auth/gestionar-usuarios", {
+      tituloPagina:"Gestion de Usuarios",
+      csrfToken: req.csrfToken(),
+      usuarios
+  });
+}catch(error){
+console.log(error);
+}
 }
 
+//eliminar usuario
+const eliminarusuario=async(req,res)=>{
+   const { usuarioId } = req.body;
+  const usuarios2 = await Usuario.findAll({
+  where: {
+    id: {
+      [Op.ne]: req.usuario.id   
+    }
+  }
+});
+    
+    
+  try{
+    const {usuarioId}=req.body;
+    
+    if(!usuarioId){
+      return res.render("auth/gestionar-usuarios",{
+        tituloPagina:"Error al eliminar usuario",
+        mensaje:"no se envió al usuario",
+         csrfToken: req.csrfToken(),
+        usuarios2
+      });
+    }
+    const usuario = await Usuario.findByPk(usuarioId);
+
+    if (!usuario) {
+      return res.render("auth/gestionar-usuarios", {
+        tituloPagina: "Error",
+        mensaje: "El usuario no existe",
+         csrfToken: req.csrfToken(),
+        usuarios2
+      });
+    }
+    await usuario.destroy();
+      const usuarios = await Usuario.findAll({
+  where: {
+    id: {
+      [Op.ne]: req.usuario.id   
+    }
+  }
+});
+
+    return res.render("auth/gestionar-usuarios", {
+      tituloPagina: "Usuario Eliminado",
+      mensaje: "El usuario fue eliminado correctamente",
+       csrfToken: req.csrfToken(),
+      usuarios
+    });
+
+  }catch(error){
+    console.log(error);
+  }
+
+}
 
 
 export {
@@ -423,5 +488,6 @@ export {
     formularioeditarperfil,
     cambiarnombre,
     logout,
-    vistadegestiondeusuarios
+    vistadegestiondeusuarios,
+    eliminarusuario
   }
