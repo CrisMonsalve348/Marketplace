@@ -60,15 +60,6 @@ const verDetallePedido = async (req, res) => {
           model: Usuario,
           attributes: ["id", "nombre", "email"],
         },
-        {
-          model: PedidoItem,
-          include: [
-            {
-              model: Producto,
-              attributes: ["id", "nombre", "imagen_principal", "precio"],
-            },
-          ],
-        },
       ],
     });
 
@@ -79,13 +70,46 @@ const verDetallePedido = async (req, res) => {
       });
     }
 
+    // Si es una ruta de cliente (/mis-pedidos/:id), verificar que el pedido pertenezca al usuario
+    if (req.path.startsWith("/mis-pedidos")) {
+      const usuarioId = req.usuario?.id || req.usuario?.dataValues?.id;
+      if (pedido.usuario_id !== usuarioId) {
+        return res.status(403).render("templates/mensaje", {
+          tituloPagina: "No autorizado",
+          mensaje: "No tienes permiso para ver este pedido",
+        });
+      }
+    }
+
+    // Cargar items del pedido
+    const items = await PedidoItem.findAll({
+      where: { pedido_id: id },
+    });
+
+    // Cargar productos para cada item
+    for (let item of items) {
+      item.Producto = await Producto.findByPk(item.producto_id, {
+        attributes: ["id", "nombre", "imagen_principal", "precio"]
+      });
+    }
+
     // Calcular subtotal
-    const items = pedido.pedido_items || [];
     const subtotal = items.reduce(
       (sum, item) => sum + parseFloat(item.subtotal || 0),
       0
     );
 
+    // Si es ruta de cliente, renderizar vista de cliente
+    if (req.path.startsWith("/mis-pedidos")) {
+      return res.render("pedidos/miDetalle", {
+        titulo: "Detalle del Pedido",
+        pedido,
+        items,
+        subtotal: subtotal.toFixed(2),
+      });
+    }
+
+    // Si es admin, renderizar vista de admin
     const estadosDisponibles = [
       { valor: "pendiente", label: "Pendiente" },
       { valor: "pagado", label: "Pagado" },
@@ -96,6 +120,7 @@ const verDetallePedido = async (req, res) => {
     res.render("admin/pedidos/detalle", {
       tituloPagina: "Detalle del Pedido",
       pedido,
+      items,
       subtotal: subtotal.toFixed(2),
       estadosDisponibles,
       csrfToken: req.csrfToken(),
@@ -147,8 +172,8 @@ const cambiarEstado = async (req, res) => {
       estadoAnterior !== "cancelado"
     ) {
       // Restaurar stock para cada item del pedido
-      for (const item of pedido.pedido_items) {
-        const producto = item.producto;
+      for (const item of pedido.PedidoItems) {
+        const producto = item.Producto;
         if (producto) {
           producto.stock += item.cantidad;
           
@@ -182,4 +207,63 @@ const cambiarEstado = async (req, res) => {
   }
 };
 
-export { listadoPedidos, verDetallePedido, cambiarEstado };
+const misPedidos = async (req, res) => {
+  try {
+    const usuarioId = req.usuario?.id || req.usuario?.dataValues?.id;
+    const { estado } = req.query;
+    
+    console.log("Usuario en req:", req.usuario);
+    console.log("Usuario ID:", usuarioId);
+    
+    if (!usuarioId) {
+      return res.status(401).json({
+        error: "Usuario no autenticado",
+      });
+    }
+
+    let whereClause = { usuario_id: usuarioId };
+    if (estado && estado !== "todos") {
+      whereClause.estado = estado;
+    }
+
+    const pedidos = await Pedido.findAll({
+      where: whereClause,
+      order: [["fecha_creacion", "DESC"]],
+    });
+
+    console.log("Pedidos encontrados:", pedidos.length);
+
+    // Cargar items para cada pedido
+    for (let pedido of pedidos) {
+      const items = await PedidoItem.findAll({
+        where: { pedido_id: pedido.id },
+      });
+
+      console.log(`Cargando ${items.length} items para pedido ${pedido.id}`);
+
+      for (let item of items) {
+        item.Producto = await Producto.findByPk(item.producto_id, {
+          attributes: ["id", "nombre", "precio", "imagen_principal"],
+        });
+      }
+
+      pedido.PedidoItems = items;
+    }
+
+    console.log("Renderizando vista con", pedidos.length, "pedidos");
+
+    res.render("pedidos/misPedidos", {
+      titulo: "Mis Pedidos",
+      pedidos,
+      filtroEstado: estado || "todos",
+    });
+  } catch (error) {
+    console.log("Error cargando mis pedidos:", error);
+    res.status(500).json({
+      error: "Error cargando tus pedidos",
+      details: error.message,
+    });
+  }
+};
+
+export { listadoPedidos, verDetallePedido, cambiarEstado, misPedidos };

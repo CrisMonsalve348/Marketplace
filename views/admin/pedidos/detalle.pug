@@ -1,116 +1,131 @@
 extends ../../layout/admin.pug
 
 block content
-  .container.my-5
-    .row
-      .col-md-8
-        .card.mb-4
-          .card-header.bg-primary.text-white
-            h4.mb-0 Detalle del Pedido ##{pedido.id}
-          .card-body
-            .row.mb-4
-              .col-md-6
-                h6.text-muted CLIENTE
-                p
-                  strong= pedido.usuario.nombre
-                  br
-                  span= pedido.usuario.email
-              .col-md-6
-                h6.text-muted FECHA DEL PEDIDO
-                p= new Date(pedido.fecha_creacion).toLocaleDateString('es-CO', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
-
-            hr
-
-            h6.text-muted DIRECCIÓN DE ENVÍO
-            p= pedido.direccion_envio
-
-            h6.text-muted MÉTODO DE PAGO
-            p
-              case pedido.metodo_pago
-                when 'contra_entrega'
+  div(class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8")
+    
+    // Header
+    div(class="mb-8")
+      a(href="/admin/pedidos" class="text-orange-600 hover:text-orange-700 font-medium text-sm mb-4 inline-flex items-center")
+        | ← Volver a Pedidos
+      h1(class="text-3xl font-bold text-gray-900") Pedido ##{pedido.id}
+    
+    div(class="grid grid-cols-1 lg:grid-cols-3 gap-8")
+      
+      // Contenido principal
+      div(class="lg:col-span-2 space-y-6")
+        
+        // Información del cliente
+        div(class="bg-white rounded-xl shadow-md p-6")
+          h2(class="text-xl font-bold text-gray-900 mb-6") Información del Pedido
+          
+          div(class="grid grid-cols-1 md:grid-cols-2 gap-6")
+            div
+              p(class="text-sm text-gray-600 font-medium uppercase tracking-wide mb-2") Cliente
+              p(class="text-lg font-semibold text-gray-900")= pedido.usuario.nombre
+              p(class="text-gray-600")= pedido.usuario.email
+            
+            div
+              p(class="text-sm text-gray-600 font-medium uppercase tracking-wide mb-2") Fecha del Pedido
+              p(class="text-lg font-semibold text-gray-900")
+                = new Date(pedido.fecha_creacion).toLocaleDateString('es-CO', { year: 'numeric', month: 'long', day: 'numeric' })
+            
+            div(class="md:col-span-2")
+              p(class="text-sm text-gray-600 font-medium uppercase tracking-wide mb-2") Dirección de Envío
+              p(class="text-gray-900")= pedido.direccion_envio
+            
+            div
+              p(class="text-sm text-gray-600 font-medium uppercase tracking-wide mb-2") Método de Pago
+              p(class="text-gray-900")
+                if pedido.metodo_pago === 'contra_entrega'
                   | Contra Entrega
-                when 'tarjeta'
+                else if pedido.metodo_pago === 'tarjeta'
                   | Tarjeta de Crédito
-                when 'transferencia'
+                else if pedido.metodo_pago === 'transferencia'
                   | Transferencia Bancaria
-                default
+                else
                   = pedido.metodo_pago
-
-            hr
-
-            h5.mt-4 Productos
-
-            .table-responsive
-              table.table
-                thead.table-light
-                  tr
-                    th Producto
-                    th Cantidad
-                    th Precio Unitario
-                    th Subtotal
-                tbody
-                  each item in pedido.pedido_items
-                    tr
-                      td
-                        if item.Producto.imagen_principal
-                          img(src=`/uploads/productos/${item.Producto.imagen_principal}`, alt=item.Producto.nombre, width="50")
-                        span.ms-2= item.Producto.nombre
-                      td
-                        strong= item.cantidad
-                      td $#{parseFloat(item.precio_unitario).toFixed(2)}
-                      td
-                        strong $#{parseFloat(item.subtotal).toFixed(2)}
-
-      .col-md-4
-        .card.mb-4
-          .card-header.bg-secondary.text-white
-            h5.mb-0 Cambiar Estado
-          .card-body
-            form#formCambiarEstado
-              input(type="hidden", name="_csrf", value=csrfToken)
-              
-              .mb-3
-                label.form-label Estado Actual
-                .input-group
-                  span.input-group-text
-                    case pedido.estado
-                      when 'pendiente'
-                        span.badge.bg-warning Pendiente
-                      when 'pagado'
-                        span.badge.bg-info Pagado
-                      when 'enviado'
-                        span.badge.bg-success Enviado
-                      when 'cancelado'
-                        span.badge.bg-danger Cancelado
-
-              .mb-3
-                label.form-label(for="nuevoEstado") Nuevo Estado
-                select.form-select(id="nuevoEstado", name="estado", required)
-                  option(value="") Selecciona un estado
-                  each estado in estadosDisponibles
-                    if estado.valor !== pedido.estado
-                      option(value=estado.valor)= estado.label
-
-              button.btn.btn-primary.w-100(type="submit") Actualizar Estado
-
-        .card
-          .card-header.bg-light
-            h6.mb-0 Información del Cambio
-          .card-body
-            if pedido.fecha_cambio_estado
-              p.mb-2
-                strong Última actualización:
-                br
-                = new Date(pedido.fecha_cambio_estado).toLocaleDateString('es-CO', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })
-              p
-                strong Actualizado por:
-                br
-                | Admin
-            else
-              p.text-muted Sin cambios aún
-
-    .mt-4
-      a.btn.btn-secondary(href="/admin/pedidos") ← Volver a Pedidos
+        
+        // Productos
+        div(class="bg-white rounded-xl shadow-md overflow-hidden")
+          div(class="bg-orange-50 px-6 py-4 border-b border-orange-200")
+            h2(class="text-lg font-bold text-gray-900") Productos Ordenados
+          
+          div(class="overflow-x-auto")
+            table(class="w-full")
+              thead(class="bg-gray-50 border-b border-gray-200")
+                tr
+                  th(class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase") Producto
+                  th(class="px-6 py-4 text-center text-xs font-bold text-gray-700 uppercase") Cantidad
+                  th(class="px-6 py-4 text-center text-xs font-bold text-gray-700 uppercase") Precio Unitario
+                  th(class="px-6 py-4 text-right text-xs font-bold text-gray-700 uppercase") Subtotal
+              tbody(class="divide-y divide-gray-200")
+                each item in items
+                  tr(class="hover:bg-gray-50 transition")
+                    td(class="px-6 py-4")
+                      div(class="flex items-center gap-3")
+                        if item.Producto && item.Producto.imagen_principal
+                          img(src=item.Producto.imagen_principal alt=item.Producto.nombre class="w-12 h-12 object-cover rounded")
+                        else
+                          div(class="w-12 h-12 bg-gray-200 rounded flex items-center justify-center")
+                            span(class="text-gray-400 text-xs") Sin imagen
+                        if item.Producto
+                          span(class="font-medium text-gray-900")= item.Producto.nombre
+                        else
+                          span(class="font-medium text-gray-500") Producto no disponible
+                    td(class="px-6 py-4 text-center")
+                      p(class="font-medium text-gray-900")= item.cantidad
+                    td(class="px-6 py-4 text-center")
+                      p(class="font-medium text-gray-900") $#{Math.trunc(item.precio_unitario).toLocaleString('es-CO')}
+                    td(class="px-6 py-4 text-right")
+                      p(class="font-bold text-orange-600") $#{Math.trunc(item.subtotal).toLocaleString('es-CO')}
+      
+      // Sidebar - Cambiar estado
+      div(class="lg:col-span-1")
+        
+        // Card de cambio de estado
+        div(class="bg-white rounded-xl shadow-md p-6 sticky top-6")
+          h2(class="text-lg font-bold text-gray-900 mb-6") Gestionar Pedido
+          
+          // Estado actual
+          div(class="mb-6")
+            p(class="text-sm text-gray-600 font-medium uppercase tracking-wide mb-3") Estado Actual
+            div
+              if pedido.estado === 'pendiente'
+                span(class="inline-block px-4 py-2 rounded-lg text-sm font-semibold bg-yellow-100 text-yellow-800") Pendiente
+              else if pedido.estado === 'pagado'
+                span(class="inline-block px-4 py-2 rounded-lg text-sm font-semibold bg-blue-100 text-blue-800") Pagado
+              else if pedido.estado === 'enviado'
+                span(class="inline-block px-4 py-2 rounded-lg text-sm font-semibold bg-green-100 text-green-800") Enviado
+              else if pedido.estado === 'cancelado'
+                span(class="inline-block px-4 py-2 rounded-lg text-sm font-semibold bg-red-100 text-red-800") Cancelado
+          
+          // Formulario cambiar estado
+          form#formCambiarEstado(class="space-y-4")
+            input(type="hidden" name="_csrf" value=csrfToken)
+            
+            div
+              label(for="nuevoEstado" class="block text-sm font-medium text-gray-700 mb-2") Cambiar a:
+              select(id="nuevoEstado" name="estado" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-orange-500 focus:border-orange-500 text-sm")
+                option(value="") Selecciona un estado
+                each estado in estadosDisponibles
+                  if estado.valor !== pedido.estado
+                    option(value=estado.valor)= estado.label
+            
+            button(type="submit" class="w-full px-6 py-3 bg-orange-600 text-white font-semibold rounded-full hover:bg-orange-700 transition")
+              | Actualizar Estado
+        
+        // Total
+        div(class="bg-white rounded-xl shadow-md p-6 mt-6")
+          h3(class="text-sm font-bold text-gray-700 uppercase tracking-wide mb-4") Resumen Financiero
+          
+          div(class="space-y-3 mb-4 pb-4 border-b border-gray-200")
+            div(class="flex justify-between items-center text-sm")
+              span(class="text-gray-600") Subtotal:
+              span(class="font-medium text-gray-900") $#{Math.trunc(subtotal).toLocaleString('es-CO')}
+          
+          div(class="flex justify-between items-center")
+            span(class="text-lg font-bold text-gray-900") Total:
+            span(class="text-2xl font-bold text-orange-600") $#{Math.trunc(pedido.total).toLocaleString('es-CO')}
 
 block scripts
   script.
@@ -146,3 +161,4 @@ block scripts
         alert('Error actualizando estado');
       }
     });
+

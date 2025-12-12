@@ -1,0 +1,105 @@
+extends ../layout/app.pug
+
+block content
+  .space-y-6.py-12
+    .max-w-6xl.mx-auto.px-4.space-y-6
+      // Header
+      div(class="flex items-center justify-between mb-8")
+        div
+          h1.text-3xl.font-bold.text-gray-900 Mis Pedidos
+          p.text-gray-600 Aquí puedes ver el historial de todos tus pedidos
+        a(href="/mis-pedidos" class="inline-flex items-center px-4 py-2 bg-transparent border border-orange-600 text-orange-600 font-medium rounded-full hover:bg-orange-50 transition cursor-pointer") 
+          | Actualizar
+
+      // Filtro por estado
+      .bg-white.shadow.rounded-lg.p-4.mb-8
+        form.flex.flex-wrap.items-center.gap-4(action="/mis-pedidos" method="GET")
+          label.text-sm.font-medium.text-gray-700 Filtrar por estado:
+          select.appearance-none.block.px-3.border.border-gray-300.rounded-full.shadow-sm.text-sm(name="estado" class="py-2 focus:outline-none focus:ring-orange-500 focus:border-orange-500")
+            option(value="todos" selected=filtroEstado==='todos') Todos
+            option(value="pendiente" selected=filtroEstado==='pendiente') Pendiente
+            option(value="pagado" selected=filtroEstado==='pagado') Pagado
+            option(value="enviado" selected=filtroEstado==='enviado') Enviado
+            option(value="cancelado" selected=filtroEstado==='cancelado') Cancelado
+          button.inline-flex.items-center.px-4.border.rounded-full.text-sm.font-medium.text-orange-700.bg-white.transition(type="submit" class="py-2 border-orange-300 hover:bg-orange-50") Filtrar
+
+      // Lista de pedidos
+      if pedidos.length > 0
+        .space-y-4
+          each pedido in pedidos
+            .rounded-xl.shadow-md.overflow-hidden(class="bg-white hover:shadow-lg transition")
+              .p-6.space-y-4
+                // Header con ID y estado
+                .flex.items-center.justify-between
+                  h2.text-lg.font-bold.text-gray-900
+                    | Pedido ##{pedido.id}
+                  case pedido.estado
+                    when 'pendiente'
+                      span.px-3.py-1.text-sm.font-medium(class="bg-yellow-100 text-yellow-700 rounded-lg") Pendiente
+                    when 'pagado'
+                      span.px-3.py-1.text-sm.font-medium(class="bg-blue-100 text-blue-700 rounded-lg") Pagado
+                    when 'enviado'
+                      span.px-3.py-1.text-sm.font-medium(class="bg-green-100 text-green-700 rounded-lg") Enviado
+                    when 'cancelado'
+                      span.px-3.py-1.text-sm.font-medium(class="bg-red-100 text-red-700 rounded-lg") Cancelado
+
+                // Información del pedido en grid
+                .grid.gap-4(class="grid-cols-1 md:grid-cols-3")
+                  div
+                    p.text-xs.uppercase.font-semibold(class="text-gray-500") Fecha
+                    p.font-medium.text-gray-900
+                      = new Date(pedido.fecha_creacion).toLocaleDateString('es-CO')
+                  div
+                    p.text-xs.uppercase.font-semibold(class="text-gray-500") Número de productos
+                    p.font-medium.text-gray-900
+                      = pedido.PedidoItems.length
+                  div
+                    p.text-xs.uppercase.font-semibold(class="text-gray-500") Total
+                    p.text-lg.font-bold(class="text-orange-600")
+                      = `$${Math.trunc(pedido.total).toLocaleString('es-CO')}`
+
+                // Botones
+                .flex.justify-end.gap-2.pt-4
+                  a.inline-flex.items-center.border.font-semibold.rounded-full(href=`/mis-pedidos/${pedido.id}` class="px-6 py-2 border-orange-600 text-orange-600 hover:bg-orange-50 transition text-sm")
+                    | Ver detalles
+                  - if (pedido.estado === 'pendiente')
+                    button.inline-flex.items-center.border.font-semibold.rounded-full(type="button" class="px-6 py-1.5 border-red-600 text-red-600 hover:bg-red-50 transition text-sm" onclick=`if(confirm('¿Estás seguro de que deseas cancelar este pedido?')) { cancelarPedido(${pedido.id}); }`)
+                      | Cancelar Pedido
+
+      else
+        // Estado vacío
+        .rounded-2xl.p-12.text-center.border(class="bg-linear-to-br from-orange-50 to-yellow-50 border-orange-200")
+          svg.w-20.h-20.mx-auto.mb-4(fill="none" stroke="currentColor" viewBox="0 0 24 24" class="text-orange-300")
+            path(stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z")
+          h2.text-2xl.font-bold.text-gray-900.mb-2 Aún no tienes pedidos
+          p.text-gray-600.mb-6 Comienza a comprar y tus pedidos aparecerán aquí
+          a.inline-flex.items-center.px-6.py-3.border.font-semibold.rounded-full(href="/productos" class="border-orange-600 text-orange-600 hover:bg-orange-50 transition")
+            | Ir a comprar
+
+  style.
+    a:hover {
+      transform: translateY(-2px);
+    }
+
+  script.
+    async function cancelarPedido(pedidoId) {
+      try {
+        const response = await fetch(`/admin/pedidos/${pedidoId}/estado`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ estado: 'cancelado' })
+        });
+        
+        if (response.ok) {
+          alert('Pedido cancelado correctamente');
+          location.reload();
+        } else {
+          alert('Error al cancelar el pedido');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Error al cancelar el pedido');
+      }
+    }

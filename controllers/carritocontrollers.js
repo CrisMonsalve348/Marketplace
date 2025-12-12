@@ -110,14 +110,21 @@ const verCarrito = async (req, res) => {
 
     const carrito = await obtenerCarrito(req.usuario.id);
 
+    // Obtener items del carrito
     const items = await CarritoItem.findAll({
       where: { carrito_id: carrito.id },
-      include: [{ 
-        model: Producto, 
-        attributes: ["id", "nombre", "imagen_principal", "stock"],
-        required: true // Esto filtrará los items con productos eliminados
-      }],
+      raw: false
     });
+
+    // Para cada item, obtener el producto asociado
+    for (let item of items) {
+      if (item.producto_id) {
+        item.Producto = await Producto.findByPk(item.producto_id, {
+          attributes: ["id", "nombre", "imagen_principal", "stock"]
+        });
+        console.log(`Producto ${item.producto_id}:`, item.Producto?.dataValues);
+      }
+    }
 
     const subtotal = items.reduce(
       (sum, i) => sum + parseFloat(i.precio_unitario) * i.cantidad,
@@ -156,12 +163,17 @@ const actualizarItem = async (req, res) => {
       return res.status(400).json({ error: "Cantidad mínima es 1" });
     }
 
-    const item = await CarritoItem.findByPk(item_id, {
-      include: [{ model: Producto }],
-    });
+    const item = await CarritoItem.findByPk(item_id);
 
     if (!item) {
       return res.status(404).json({ error: "Item no encontrado" });
+    }
+
+    // Obtener producto asociado
+    const producto = await Producto.findByPk(item.producto_id);
+    
+    if (!producto) {
+      return res.status(404).json({ error: "Producto no encontrado" });
     }
 
     // Verificar que el item pertenece al carrito del usuario
@@ -174,7 +186,7 @@ const actualizarItem = async (req, res) => {
     }
 
     // Validar stock
-    if (cantidadNum > item.Producto.stock) {
+    if (cantidadNum > producto.stock) {
       return res.status(400).json({ error: "Stock insuficiente" });
     }
 
@@ -216,7 +228,7 @@ const eliminarItem = async (req, res) => {
 
     res.json({ success: true, message: "Item eliminado" });
   } catch (error) {
-    console.log(error);
+    console.log("Error eliminando item:", error);
     res.status(500).json({ error: "Error eliminando item" });
   }
 };
@@ -317,11 +329,6 @@ const procesarCheckout = async (req, res) => {
 
     const items = await CarritoItem.findAll({
       where: { carrito_id: carrito.id },
-      include: [{
-        model: Producto,
-        attributes: ["id", "nombre", "stock", "estado"],
-        required: true,
-      }],
     });
 
     if (items.length === 0) {
@@ -331,9 +338,22 @@ const procesarCheckout = async (req, res) => {
       });
     }
 
+    // Cargar productos para cada item
+    for (let item of items) {
+      item.Producto = await Producto.findByPk(item.producto_id, {
+        attributes: ["id", "nombre", "stock", "estado"]
+      });
+    }
+
     // Calcular total y validar stock
     let total = 0;
     for (const item of items) {
+      if (!item.Producto) {
+        return res.status(400).render("templates/mensaje", {
+          tituloPagina: "Producto no encontrado",
+          mensaje: "Uno de los productos en tu carrito ya no existe",
+        });
+      }
       if (item.cantidad > item.Producto.stock) {
         return res.status(400).render("templates/mensaje", {
           tituloPagina: "Stock insuficiente",
@@ -394,9 +414,19 @@ const procesarCheckout = async (req, res) => {
       await t.commit();
 
       // renderizar confirmación fuera de la transacción
+      const pedidoConfirm = await Pedido.findByPk(pedido.id, {
+        include: [{
+          model: PedidoItem,
+          include: [{
+            model: Producto,
+            attributes: ["id", "nombre"]
+          }]
+        }]
+      });
+
       res.render("carrito/confirmacion", {
         pagina: "Pedido Confirmado",
-        pedido,
+        pedido: pedidoConfirm,
         total: total.toFixed(2),
       });
       return;

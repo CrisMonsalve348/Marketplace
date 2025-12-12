@@ -21,6 +21,8 @@ block content
         
         // Sección de información
         div
+          div(id="mensaje-container")
+          
           // Nombre del producto
           h1(class="text-3xl font-bold text-gray-900 mb-4")= producto.nombre
           
@@ -70,9 +72,8 @@ block content
             a(href="/productos" class="block w-full text-center px-6 py-3 border border-orange-200 text-orange-700 text-sm font-semibold rounded-full hover:bg-orange-50 transition cursor-pointer")
               | Seguir comprando
 
-  // Productos relacionados
-  if relacionados.length > 0
-    div(class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 mb-8")
+  div(class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 mb-8")
+    if relacionados.length > 0
       h2(class="text-2xl font-bold text-gray-900 mb-6") Productos relacionados
       
       div(class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6")
@@ -89,22 +90,39 @@ block content
             
             // Contenido
             div(class="p-4")
-              h3(class="text-lg font-bold text-gray-900 mb-2 line-clamp-2")
-                a(href=`/productos/${p.id}` class="hover:text-orange-600 transition")= p.nombre
+              h3(class="text-lg font-bold text-gray-900 mb-2 line-clamp-2")= p.nombre
               
               div(class="flex items-center justify-between mb-3")
                 p(class="text-xl font-bold text-gray-900") $#{Math.floor(p.precio).toLocaleString('es-CO')}
               
-              div(class="flex items-center gap-2")
+              div(class="flex items-center gap-2 mb-4")
                 if p.stock > 0
                   span(class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800")
                     | Stock: #{p.stock}
                 else
                   span(class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800")
                     | Sin stock
+              
+              div(class="flex gap-2")
+                a(href=`/productos/${p.id}` class="w-full inline-flex items-center justify-center px-4 py-2 border border-orange-200 text-orange-700 text-sm font-semibold rounded-full hover:bg-orange-50 transition")
+                  | Ver
 
 block scripts
   script.
+    function mostrarMensaje(mensaje, tipo = 'success') {
+      const container = document.getElementById('mensaje-container');
+      container.innerHTML = '';
+      const div = document.createElement('div');
+      div.className = `mb-4 p-3 rounded ${tipo === 'success' ? 'bg-green-100 border border-green-400 text-green-700' : 'bg-red-100 border border-red-400 text-red-700'}`;
+      div.innerHTML = `<p class="text-sm font-medium">${mensaje}</p>`;
+      container.appendChild(div);
+      setTimeout(() => {
+        div.style.opacity = '0';
+        div.style.transition = 'opacity 0.3s';
+        setTimeout(() => div.remove(), 300);
+      }, 4000);
+    }
+    
     // Attach handlers only to enabled add-to-cart buttons
     document.querySelectorAll('.btn-agregar-carrito').forEach(function(btn){
       if (!btn || btn.disabled) return; // skip disabled buttons
@@ -130,15 +148,14 @@ block scripts
 
           if (response.ok) {
             const data = await response.json();
-            alert(`"${nombre}" agregado al carrito (${data.carritoItems} artículos)`);
-            setTimeout(() => window.location.href = '/carrito', 1000);
+            mostrarMensaje(`"${nombre}" agregado al carrito (${data.carritoItems} artículos)`, 'success');
           } else {
             const data = await response.json();
-            alert('Error: ' + (data.error || 'Error agregando al carrito'));
+            mostrarMensaje('Error: ' + (data.error || 'Error agregando al carrito'), 'error');
           }
         } catch (err) {
           console.error('Error agregando al carrito:', err);
-          alert('Error agregando al carrito');
+          mostrarMensaje('Error agregando al carrito', 'error');
         }
       });
     });

@@ -16,7 +16,9 @@ import {
   listadoPedidos,
   verDetallePedido,
   cambiarEstado,
+  misPedidos,
 } from "../controllers/pedidocontrollers.js";
+import protegerRuta from "../middleware/protegerruta.js";
 
 const router = express.Router();
 
@@ -38,6 +40,10 @@ router.get("/admin/productos/:id/detalle", protegerRutaadmin, verDetalleAdmin);
 router.get("/admin/pedidos", protegerRutaadmin, listadoPedidos);
 router.get("/admin/pedidos/:id", protegerRutaadmin, verDetallePedido);
 router.post("/admin/pedidos/:id/estado", protegerRutaadmin, cambiarEstado);
+
+// Cliente - Mis Pedidos
+router.get("/mis-pedidos", protegerRuta, misPedidos);
+router.get("/mis-pedidos/:id", protegerRuta, verDetallePedido);
 
 // Public listing y búsqueda
 router.get("/productos", listadoPublico);

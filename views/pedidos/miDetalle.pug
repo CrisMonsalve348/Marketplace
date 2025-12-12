@@ -1,0 +1,97 @@
+extends ../layout/app.pug
+
+block content
+  .max-w-4xl.mx-auto.py-12.px-4
+
+    .space-y-6
+      // Header del pedido
+      .bg-white.rounded-xl.shadow-md.p-6
+        .flex.items-center.justify-between.mb-6
+          div
+            h1.text-3xl.font-bold.text-gray-900
+              | Pedido ##{pedido.id}
+            p.text-gray-600.mt-1
+              = `Realizado el ${new Date(pedido.fecha_creacion).toLocaleDateString('es-CO')} a las ${new Date(pedido.fecha_creacion).toLocaleTimeString('es-CO')}`
+          
+          case pedido.estado
+            when 'pendiente'
+              span.px-4.py-2.text-sm.font-medium(class="bg-yellow-100 text-yellow-700 rounded-lg") Pendiente
+            when 'pagado'
+              span.px-4.py-2.text-sm.font-medium(class="bg-blue-100 text-blue-700 rounded-lg") Pagado
+            when 'enviado'
+              span.px-4.py-2.text-sm.font-medium(class="bg-green-100 text-green-700 rounded-lg") Enviado
+            when 'cancelado'
+              span.px-4.py-2.text-sm.font-medium(class="bg-red-100 text-red-700 rounded-lg") Cancelado
+
+        // Información de envío
+        .grid.gap-6(class="md:grid-cols-2")
+          div
+            h3.text-sm.uppercase.font-semibold.text-gray-500.mb-2 Dirección de envío
+            p.text-gray-900.font-medium
+              = pedido.direccion_envio || 'No especificada'
+          
+          div
+            h3.text-sm.uppercase.font-semibold.text-gray-500.mb-2 Método de pago
+            p.text-gray-900.font-medium
+              case pedido.metodo_pago
+                when 'contra_entrega'
+                  | Contra entrega
+                when 'tarjeta'
+                  | Tarjeta de crédito
+                when 'transferencia'
+                  | Transferencia bancaria
+                default
+                  = pedido.metodo_pago
+
+      // Tabla de productos
+      .bg-white.rounded-xl.shadow-md.overflow-hidden
+        .px-6.py-4.border-b.border-gray-200(class="bg-gray-50")
+          h2.text-lg.font-bold.text-gray-900 Productos
+
+        .overflow-x-auto
+          table.w-full
+            thead
+              tr.border-b.border-gray-200(class="bg-gray-50")
+                th.px-6.py-3.text-left.text-sm.font-semibold.text-gray-700 Producto
+                th.px-6.py-3.text-center.text-sm.font-semibold.text-gray-700 Cantidad
+                th.px-6.py-3.text-right.text-sm.font-semibold.text-gray-700 Precio unitario
+                th.px-6.py-3.text-right.text-sm.font-semibold.text-gray-700 Subtotal
+            
+            tbody
+              each item in items
+                tr.border-b.border-gray-200(class="hover:bg-gray-50 transition")
+                  td.px-6.py-4
+                    .flex.items-center.gap-4
+                      if item.Producto && item.Producto.imagen_principal
+                        img.w-16.h-16.rounded-lg.object-cover(src=item.Producto.imagen_principal alt=item.Producto.nombre)
+                      else
+                        .w-16.h-16.rounded-lg.bg-gray-200
+                      div
+                        p.font-medium.text-gray-900
+                          = item.Producto ? item.Producto.nombre : 'Producto no disponible'
+                  td.px-6.py-4.text-center.text-gray-900
+                    = item.cantidad
+                  td.px-6.py-4.text-right.text-gray-900
+                    = `$${Math.trunc(item.precio_unitario).toLocaleString('es-CO')}`
+                  td.px-6.py-4.text-right.font-medium.text-gray-900
+                    = `$${Math.trunc(item.subtotal).toLocaleString('es-CO')}`
+
+      // Resumen de costos
+      .bg-white.rounded-xl.shadow-md.p-6
+        .space-y-3
+          .flex.justify-between.text-gray-700
+            span Subtotal
+            span= `$${Math.trunc(subtotal).toLocaleString('es-CO')}`
+          
+          .border-t.border-gray-200.pt-3
+          
+          .flex.justify-between.text-lg.font-bold.text-gray-900
+            span Total
+            span.text-orange-600= `$${Math.trunc(pedido.total).toLocaleString('es-CO')}`
+
+      // Botones de acción
+      .flex.justify-end.gap-2.pt-6
+        a.inline-flex.items-center.border.font-semibold.rounded-full(href="/mis-pedidos" class="px-6 py-2 border-orange-600 text-orange-600 hover:bg-orange-50 transition text-sm")
+          | Volver
+
+  

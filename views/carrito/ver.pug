@@ -2,86 +2,146 @@ extends ../layout/app.pug
 
 block content
   div(class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 mb-12")
-    
-    // Título
     h1(class="text-3xl font-bold text-gray-900 mb-8") Mi Carrito de Compras
     input(type="hidden" id="csrfToken" name="_csrf" value=csrfToken)
     
     if items.length > 0
       div(class="grid grid-cols-1 lg:grid-cols-3 gap-8")
-        
-        // Columna de items
         div(class="lg:col-span-2")
-          div(class="space-y-4")
-            each item in items
-              if item.Producto
-                div(class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition")
-                  div(class="flex gap-6")
-                    // Imagen
-                    div(class="flex-shrink-0")
-                      if item.Producto.imagen_principal
-                        img(src=`/uploads/productos/${item.Producto.imagen_principal}` alt=item.Producto.nombre class="w-24 h-24 object-cover rounded-lg")
+          div(class="bg-white rounded-xl shadow-md overflow-hidden")
+            div(class="overflow-x-auto")
+              table(class="w-full")
+                thead(class="bg-orange-50 border-b-2 border-orange-200")
+                  tr
+                    th(class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider") Producto
+                    th(class="px-6 py-4 text-center text-xs font-bold text-gray-700 uppercase tracking-wider") Precio
+                    th(class="px-6 py-4 text-center text-xs font-bold text-gray-700 uppercase tracking-wider") Cantidad
+                    th(class="px-6 py-4 text-right text-xs font-bold text-gray-700 uppercase tracking-wider") Subtotal
+                    th(class="px-6 py-4 text-center text-xs font-bold text-gray-700 uppercase tracking-wider") Acción
+                tbody(class="divide-y divide-gray-200")
+                  each item in items
+                    tr(class="hover:bg-gray-50 transition")
+                      if item.Producto
+                        td(class="px-6 py-4")
+                          div(class="flex items-center gap-4")
+                            if item.Producto.imagen_principal
+                              img(src=item.Producto.imagen_principal alt=item.Producto.nombre class="w-20 h-20 object-cover rounded-lg border border-gray-200")
+                            else
+                              div(class="w-20 h-20 bg-gray-200 rounded-lg flex items-center justify-center border border-gray-200")
+                                span(class="text-gray-400 text-xs") Sin imagen
+                            div(class="flex-1 min-w-0")
+                              h3(class="text-sm font-bold text-gray-900 mb-1")= item.Producto.nombre
+                              p(class="text-xs text-gray-500") Stock: #{item.Producto.stock}
+                        td(class="px-6 py-4 text-center")
+                          p(class="text-lg font-bold text-orange-600") $#{Math.floor(item.precio_unitario).toLocaleString('es-CO')}
+                        td(class="px-6 py-4 text-center")
+                          input(type="number" min="1" max=item.Producto.stock value=item.cantidad data-item-id=item.id data-stock=item.Producto.stock data-cantidad=item.cantidad class="w-20 px-3 py-2 border border-gray-300 rounded-lg text-center focus:ring-2 focus:ring-orange-500 focus:border-orange-500")
+                        td(class="px-6 py-4 text-right")
+                          p(class="text-lg font-bold text-gray-900") $#{Math.floor(item.precio_unitario * item.cantidad).toLocaleString('es-CO')}
+                        td(class="px-6 py-4 text-center")
+                          button(class="px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition btn-eliminar font-medium text-sm" data-item-id=item.id type="button") Eliminar
                       else
-                        div(class="w-24 h-24 bg-gray-200 rounded-lg flex items-center justify-center")
-                          svg(xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-8 h-8 text-gray-400")
-                            path(d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z")
-                    
-                    // Información del producto
-                    div(class="flex-1")
-                    h3(class="text-lg font-bold text-gray-900 mb-2")= item.Producto.nombre
-                    p(class="text-xl font-bold text-gray-900 mb-3") $#{Math.floor(item.precio_unitario).toLocaleString('es-CO')}
-                    
-                    div(class="flex items-center gap-4")
-                      // Cantidad
-                      div(class="flex items-center gap-2")
-                        label(class="text-sm font-medium text-gray-700") Cantidad:
-                        input(type="number" min="1" value=item.cantidad data-item-id=item.id data-stock=item.Producto.stock data-cantidad=item.cantidad class="w-20 px-3 py-2 border border-gray-300 rounded-full text-center focus:ring-orange-500 focus:border-orange-500 text-sm")
-                      
-                      // Subtotal
-                      div(class="flex items-center gap-2")
-                        span(class="text-sm font-medium text-gray-700") Subtotal:
-                        span(class="text-lg font-bold text-gray-900") $#{Math.floor(item.precio_unitario * item.cantidad).toLocaleString('es-CO')}
-                  
-                  // Botón eliminar
-                  div(class="flex-shrink-0")
-                    button(class="p-2 text-red-600 hover:bg-red-50 rounded-full transition btn-eliminar" data-item-id=item.id type="button" title="Eliminar")
-                      svg(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6")
-                        path(stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12")
+                        td(colspan="5" class="px-6 py-4 text-center text-gray-500") Producto eliminado
         
-        // Columna de resumen
         div(class="lg:col-span-1")
           div(class="bg-white rounded-xl shadow-md p-6 sticky top-6")
             h2(class="text-xl font-bold text-gray-900 mb-6") Resumen del pedido
-            
-            // Subtotal
-            div(class="flex justify-between items-center mb-3 pb-3 border-b border-gray-200")
-              span(class="text-gray-700") Subtotal:
-              span(class="text-lg font-semibold text-gray-900") $#{subtotal}
-            
-            // Total
-            div(class="flex justify-between items-center mb-6")
-              span(class="text-lg font-bold text-gray-900") Total:
-              span(class="text-2xl font-bold text-orange-600") $#{total}
-            
-            // Botones
+            div(class="space-y-4 mb-6")
+              div(class="flex justify-between items-center text-sm")
+                span(class="text-gray-600") Productos:
+                span(class="font-medium text-gray-900")= items.length
+              div(class="flex justify-between items-center pt-4 border-t-2 border-orange-200")
+                span(class="text-lg font-bold text-gray-900") Total:
+                span(class="text-2xl font-bold text-orange-600") $#{Math.trunc(Number(total)).toLocaleString('es-CO')}
             div(class="space-y-3")
-              a(href="/carrito/checkout" class="block w-full text-center px-6 py-3 bg-orange-600 text-white font-semibold rounded-full hover:bg-orange-700 transition")
-                | Ir a Checkout
-              a(href="/productos" class="block w-full text-center px-6 py-3 border border-gray-300 text-gray-700 font-semibold rounded-full hover:bg-gray-50 transition")
+              a(href="/carrito/checkout" class="block w-full text-center px-6 py-3 bg-orange-600 text-white font-semibold rounded-full hover:bg-orange-700 transition shadow-md hover:shadow-lg")
+                | Proceder al Pago
+              a(href="/productos" class="block w-full text-center px-6 py-3 border-2 border-orange-300 text-orange-700 font-semibold rounded-full hover:bg-orange-50 transition")
                 | Seguir Comprando
 
     else
       div(class="bg-white rounded-xl shadow-md p-12 text-center")
-        svg(xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-24 h-24 mx-auto mb-6 text-gray-400")
-          path(stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z")
-        p(class="text-xl font-semibold text-gray-900 mb-3") Tu carrito está vacío
-        p(class="text-gray-600 mb-6") Descubre nuestros productos y comienza a comprar
-        a(href="/productos" class="inline-flex items-center px-6 py-3 bg-orange-600 text-white font-semibold rounded-full hover:bg-orange-700 transition")
-          | Ir al catálogo
+        div(class="max-w-md mx-auto")
+          h2(class="text-2xl font-bold text-gray-900 mb-3") Tu carrito está vacío
+          p(class="text-gray-600 mb-8") Descubre nuestros productos y encuentra lo que necesitas
+          a(href="/productos" class="inline-block px-6 py-3 border border-orange-200 text-orange-700 font-semibold rounded-full hover:bg-orange-50 transition cursor-pointer") Ver Catálogo
 
   script.
     const csrfToken = document.getElementById('csrfToken')?.value || '';
-
+    
+    document.querySelectorAll('input[type="number"]').forEach(input => {
+      input.addEventListener('change', async (e) => {
+        const cantidad = parseInt(e.target.value);
+        const itemId = e.target.dataset.itemId;
+        const stock = parseInt(e.target.dataset.stock);
+        
+        if (cantidad < 1) {
+          alert('La cantidad debe ser al menos 1');
+          e.target.value = e.target.dataset.cantidad;
+          return;
+        }
+        
+        if (cantidad > stock) {
+          alert(`Solo hay ${stock} unidades disponibles`);
+          e.target.value = e.target.dataset.cantidad;
+          return;
+        }
+        
+        try {
+          const response = await fetch('/carrito/actualizar', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'CSRF-Token': csrfToken
+            },
+            body: JSON.stringify({ item_id: itemId, cantidad })
+          });
+          
+          if (response.ok) {
+            location.reload();
+          } else {
+            const data = await response.json();
+            alert('Error: ' + data.error);
+            e.target.value = e.target.dataset.cantidad;
+          }
+        } catch (error) {
+          console.error('Error:', error);
+          alert('Error actualizando cantidad');
+          e.target.value = e.target.dataset.cantidad;
+        }
+      });
+    });
+    
+    document.querySelectorAll('.btn-eliminar').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        if (!confirm('¿Deseas eliminar este producto del carrito?')) return;
+        
+        const itemId = e.currentTarget.dataset.itemId;
+        
+        try {
+          const response = await fetch(`/carrito/${itemId}`, {
+            method: 'DELETE',
+            headers: {
+              'CSRF-Token': csrfToken
+            }
+          });
+          
+          console.log('Response status:', response.status);
+          
+          if (response.ok) {
+            location.reload();
+          } else {
+            console.error('Response not ok:', response.status);
+            const data = await response.json();
+            console.error('Error data:', data);
+            alert('Error: ' + (data.error || 'No se pudo eliminar'));
+          }
+        } catch (error) {
+          console.error('Error:', error);
+          alert('Error eliminando producto');
+        }
+      });
+    });
     // Actualizar cantidad
     document.querySelectorAll('input[type="number"]').forEach(input => {
       input.addEventListener('change', async (e) => {
@@ -112,30 +172,4 @@ block content
       });
     });
     
-    // Eliminar item
-    document.querySelectorAll('.btn-eliminar').forEach(btn => {
-      btn.addEventListener('click', async (e) => {
-        if (!confirm('¿Estás seguro?')) return;
-        
-        const itemId = e.currentTarget.dataset.itemId;
-        
-        try {
-          const response = await fetch(`/carrito/${itemId}`, {
-            method: 'DELETE',
-            headers: {
-              'CSRF-Token': csrfToken
-            }
-          });
-          
-          if (response.ok) {
-            e.currentTarget.closest('tr').remove();
-            location.reload();
-          } else {
-            alert('Error eliminando item');
-          }
-        } catch (error) {
-          console.error('Error:', error);
-          alert('Error eliminando item');
-        }
-      });
-    });
+    // Eliminar item - DUPLICADO, NO USAR
