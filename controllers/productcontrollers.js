@@ -226,10 +226,72 @@ const listadoPublico = async (req, res) => {
 // Listado admin (gestionar)
 const listadoAdmin = async (req, res) => {
   try {
-    const productos = await Producto.findAll({ order: [["fecha_creacion", "DESC"]] });
-    return res.render("productos/gestion", {
-      pagina: "Gestionar Productos",
+    const { categoria, buscar } = req.query;
+    
+    // Si no hay búsqueda ni categoría, mostrar la vista de gestión
+    if (!buscar && !categoria) {
+      const productos = await Producto.findAll({
+        order: [["fecha_creacion", "DESC"]],
+        include: [{ model: Categoria, attributes: ["id", "nombre", "slug"] }],
+      });
+
+      return res.render("productos/gestion", {
+        tituloPagina: "Gestionar Productos",
+        productos,
+        csrfToken: req.csrfToken(),
+      });
+    }
+
+    // Si hay búsqueda o categoría, mostrar el dashboard con resultados
+    let where = {};
+    let categoriaSeleccionada = null;
+
+    // Filtrar por categoría (si se pasa ID directamente)
+    if (categoria) {
+      where.categoria_id = parseInt(categoria);
+      // Obtener info de la categoría seleccionada
+      categoriaSeleccionada = await Categoria.findByPk(categoria, {
+        attributes: ["id", "nombre"],
+      });
+    }
+
+    // Filtrar por búsqueda de nombre de producto o categoría
+    if (buscar && buscar.trim()) {
+      const buscarTrim = buscar.trim();
+      
+      // Primero buscar si hay categorías que coincidan
+      const categoriasCoincidentes = await Categoria.findAll({
+        where: {
+          nombre: { [Op.like]: `%${buscarTrim}%` }
+        },
+        attributes: ['id']
+      });
+
+      const idsCategoriasCoincidentes = categoriasCoincidentes.map(cat => cat.id);
+
+      // Buscar productos que coincidan por nombre O por ID de categoría encontrada
+      if (idsCategoriasCoincidentes.length > 0) {
+        where[Op.or] = [
+          { nombre: { [Op.like]: `%${buscarTrim}%` } },
+          { categoria_id: { [Op.in]: idsCategoriasCoincidentes } }
+        ];
+      } else {
+        // Solo buscar por nombre de producto
+        where.nombre = { [Op.like]: `%${buscarTrim}%` };
+      }
+    }
+
+    const productos = await Producto.findAll({
+      where,
+      order: [["fecha_creacion", "DESC"]],
+      include: [{ model: Categoria, attributes: ["id", "nombre", "slug"] }],
+    });
+
+    return res.render("dashboard", {
+      tituloPagina: buscar ? `Resultados de búsqueda: "${buscar}"` : (categoriaSeleccionada ? `Productos - ${categoriaSeleccionada.nombre}` : "Panel de Administración"),
       productos,
+      filtros: { categoria, buscar },
+      categoriaSeleccionada,
       csrfToken: req.csrfToken(),
     });
   } catch (error) {
@@ -462,6 +524,40 @@ const actualizarProducto = async (req, res) => {
   }
 };
 
+// Ver detalle de un producto en admin
+const verDetalleAdmin = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const producto = await Producto.findByPk(id, {
+      include: [{ model: Categoria, attributes: ["id", "nombre", "slug"] }],
+    });
+
+    if (!producto) {
+      return res.status(404).render("templates/mensaje", {
+        tituloPagina: "Producto no encontrado",
+        mensaje: "El producto que buscas no existe.",
+        enlace: "/admin/productos",
+        textoEnlace: "Volver a productos",
+      });
+    }
+
+    res.render("productos/detalleAdmin", {
+      pagina: `${producto.nombre}`,
+      producto,
+      csrfToken: req.csrfToken(),
+    });
+  } catch (error) {
+    console.error("Error en verDetalleAdmin:", error);
+    return res.status(500).render("templates/mensaje", {
+      tituloPagina: "Error",
+      mensaje: "Error cargando el producto.",
+      enlace: "/admin/productos",
+      textoEnlace: "Volver a productos",
+    });
+  }
+};
+
 export { 
   formularioNuevo, 
   guardarNuevo,
@@ -470,5 +566,6 @@ export {
   listadoPublico, 
   listadoAdmin, 
   verDetalle,
+  verDetalleAdmin,
   productosDestacados 
 };

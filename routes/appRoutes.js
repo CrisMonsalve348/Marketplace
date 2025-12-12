@@ -10,6 +10,7 @@ import {
   listadoPublico,
   listadoAdmin,
   verDetalle,
+  verDetalleAdmin,
 } from "../controllers/productcontrollers.js";
 import {
   listadoPedidos,
@@ -31,6 +32,7 @@ router.get("/admin/productos/nuevo", protegerRutaadmin, formularioNuevo);
 router.post("/admin/productos/nuevo", protegerRutaadmin, guardarNuevo);
 router.get("/admin/productos/:id/editar", protegerRutaadmin, formularioEditar);
 router.post("/admin/productos/:id/editar", protegerRutaadmin, actualizarProducto);
+router.get("/admin/productos/:id/detalle", protegerRutaadmin, verDetalleAdmin);
 
 // Admin - Pedidos
 router.get("/admin/pedidos", protegerRutaadmin, listadoPedidos);

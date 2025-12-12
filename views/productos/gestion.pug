@@ -1,51 +1,87 @@
 extends ../layout/admin.pug
 
 block content
-  div(class="mx-auto max-w-7xl px-4 mt-6")
-    div(class="flex items-center justify-between mb-6")
-      h1(class="text-3xl font-bold text-gray-900")= pagina
-      a(href="/admin/productos/nuevo" class="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-md transition") 
-        span(class="mr-2") +
-        | Nuevo producto
+  div(class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6")
     
+    div(class="flex items-center justify-between mb-8")
+      h1(class="text-3xl font-bold text-gray-900") Gestionar Productos
+      a(href="/admin/productos/nuevo" class="inline-flex items-center gap-2 px-4 py-2 bg-transparent border border-orange-600 text-orange-600 hover:bg-orange-50 font-medium rounded-full transition") 
+        span +
+        | Nuevo Producto
+    
+    // Grid de productos en cards
     if productos.length
-      div(class="bg-white shadow rounded-lg overflow-hidden")
-        table(class="min-w-full divide-y divide-gray-200")
-          thead(class="bg-gray-50")
-            tr
-              th(class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider") ID
-              th(class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider") Nombre
-              th(class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider") Descripción
-              th(class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider") Precio
-              th(class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider") Stock
-              th(class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider") Estado
-              th(class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider") Imagen
-              th(class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider") Acciones
-          tbody(class="bg-white divide-y divide-gray-200")
-            each p in productos
-              tr(class="hover:bg-gray-50 transition")
-                td(class="px-6 py-4 whitespace-nowrap text-sm text-gray-900")= p.id
-                td(class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900")= p.nombre
-                td(class="px-6 py-4 text-sm text-gray-600")
-                  span(title=p.descripcion)= p.descripcion ? p.descripcion.substring(0, 50) + '...' : '-'
-                td(class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900") $#{parseFloat(p.precio).toFixed(2)}
-                td(class="px-6 py-4 whitespace-nowrap text-sm")
-                  span(class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium" + (p.stock > 0 ? ' bg-green-100 text-green-800' : ' bg-red-100 text-red-800'))= p.stock
-                td(class="px-6 py-4 whitespace-nowrap text-sm")
-                  span(class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium" + (p.estado === 'publicado' ? ' bg-blue-100 text-blue-800' : p.estado === 'no disponible' ? ' bg-gray-100 text-gray-800' : ' bg-yellow-100 text-yellow-800'))= p.estado
-                td(class="px-6 py-4 whitespace-nowrap text-sm")
-                  if p.imagen_principal
-                    img(src=p.imagen_principal width="50" height="50" alt=p.nombre class="rounded")
-                  else
-                    span(class="text-gray-400 italic") Sin imagen
-                td(class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-3 flex")
-                  a(href=`/admin/productos/${p.id}/editar` class="text-indigo-600 hover:text-indigo-900 font-medium") Editar
-                  form(method="POST" action=`/admin/productos/${p.id}/eliminar` class="inline")
+      div(class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6")
+        each producto in productos
+          div(class="bg-white rounded-xl shadow-md hover:shadow-xl transition overflow-hidden")
+            // Imagen
+            div(class="relative w-full h-48 bg-gray-200 overflow-hidden")
+              if producto.imagen_principal
+                img(src=producto.imagen_principal alt=producto.nombre class="w-full h-full object-cover hover:scale-105 transition duration-300")
+              else
+                div(class="w-full h-full flex items-center justify-center bg-gray-300")
+                  svg(xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-12 h-12 text-gray-400")
+                    path(d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z")
+            
+            // Contenido
+            div(class="p-4")
+              // ID
+              p(class="text-xs text-gray-500 font-mono mb-2") ID: #{producto.id}
+              
+              // Nombre
+              h3(class="text-xl font-bold text-gray-900 mb-2 line-clamp-2")= producto.nombre
+              
+              // Categoría
+              if producto.categoria && producto.categoria.nombre
+                p(class="text-xs text-orange-600 font-medium mb-3")= producto.categoria.nombre
+
+              // Precio
+              div(class="flex items-center justify-between mb-3")
+                p(class="text-2xl font-normal text-gray-900") $#{Math.floor(producto.precio).toLocaleString('es-CO')}
+              
+              // Stock y Estado en fila
+              div(class="flex items-center gap-2 mb-4")
+                if producto.stock > 0
+                  span(class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800")
+                    | Stock: #{producto.stock}
+                else
+                  span(class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800")
+                    | Sin stock
+
+                if producto.estado === 'publicado'
+                  span(class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800")
+                    | Publicado
+                else if producto.estado === 'no disponible'
+                  span(class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800")
+                    | No disponible
+                else
+                  span(class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800")
+                    | Borrador
+
+              // Acciones
+              div(class="space-y-2")
+                a(href=`/admin/productos/${producto.id}/detalle` class="w-full inline-flex items-center justify-center px-4 py-2 border border-orange-200 text-orange-700 text-sm font-semibold rounded-full hover:bg-orange-50 transition")
+                  | Ver
+                div(class="flex gap-2")
+                  a(href=`/admin/productos/${producto.id}/editar` class="flex-1 inline-flex items-center justify-center px-4 py-2 border border-orange-200 text-orange-700 text-sm font-semibold rounded-full hover:bg-orange-50 transition")
+                    | Editar
+                  form(method="POST" action=`/admin/productos/${producto.id}/eliminar` class="flex-1")
                     input(type="hidden" name="_csrf" value=csrfToken)
-                    button(type="submit" class="text-red-600 hover:text-red-900 font-medium" onclick="return confirm('¿Eliminar este producto?')") Eliminar
+                    button(type="submit" class="w-full inline-flex items-center justify-center px-4 py-2 border border-red-200 text-red-700 text-sm font-semibold rounded-full hover:bg-red-50 transition cursor-pointer" onclick="return confirm('¿Estás seguro de eliminar este producto?')")
+                      | Eliminar
+
     else
-      div(class="bg-white shadow rounded-lg p-8 text-center")
-        p(class="text-gray-600 mb-4") No hay productos registrados.
-        a(href="/admin/productos/nuevo" class="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-md transition") 
-          span(class="mr-2") +
-          | Crear el primer producto
+      div(class="bg-white rounded-xl shadow-md p-8 text-center")
+        if filtros && filtros.categoria
+          div(class="space-y-4")
+            p(class="text-lg font-semibold text-gray-900") No hay productos en esta categoría
+            p(class="text-gray-600 mb-4") Aún no has agregado productos para esta categoría.
+            a(href="/dashboard" class="inline-flex items-center px-4 py-2 border border-orange-600 text-orange-600 font-medium rounded-full hover:bg-orange-50 transition") 
+              | Ver todos los productos
+        else
+          div(class="space-y-4")
+            p(class="text-lg font-semibold text-gray-900") No hay productos registrados
+            p(class="text-gray-600 mb-4") Comienza agregando tu primer producto.
+            a(href="/admin/productos/nuevo" class="inline-flex items-center gap-2 px-4 py-2 bg-orange-600 text-white font-medium rounded-full hover:bg-orange-700 transition") 
+              span +
+              | Crear el primer producto

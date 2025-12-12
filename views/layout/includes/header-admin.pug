@@ -1,5 +1,5 @@
 // Header Admin con mismo estilo visual
-header(class="bg-gray-50  text-black py-4")
+header(class="bg-gray-50 text-black py-4")
     .max-w-7xl.mx-auto.px-4.relative.flex.items-center.justify-between
         // Marca
         a(href="/dashboard")
@@ -9,30 +9,78 @@ header(class="bg-gray-50  text-black py-4")
                     span.font-extrabold.text-orange-600 Open
                     span.font-semibold.ml-1 Trade
 
-        // Navegación centrada tipo pill
-        nav(class="hidden md:block absolute left-1/2 -translate-x-1/2")
-            div(class="flex items-center gap-6 bg-orange-200 rounded-full py-2 pl-5 pr-3 ring-1 ring-white/10 shadow")
-                a(href="/admin/productos" class="text-sm font-normal hover:text-orange-400 transition") Productos
-                // Categorías (desplegable)
-                .relative.group
-                    a(href="#" class="text-sm font-normal flex items-center gap-1 hover:text-orange-400 transition")
-                        | Categorías
-                        svg(xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 opacity-80")
-                            path(fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z" clip-rule="evenodd")
-                    // Menú de categorías
-                    div(class="absolute top-full left-0 mt-3 min-w-56 bg-white text-black border border-black/10 rounded-2xl p-2 hidden group-hover:block z-50")
-                        if categoriasMenu && categoriasMenu.length
-                            each cat in categoriasMenu
-                                a(href=`/admin/categorias` class="block px-3 py-2 rounded-lg text-sm hover:bg-black/5")= cat.nombre
-                        else
-                            span.block.px-3.py-2.text-sm.text-gray-500 No hay categorías
-                a(href="/admin/pedidos" class="text-sm font-normal hover:text-orange-400 transition") Pedidos
-                a(href="/auth/gestionar-usuarios" class="text-sm font-normal hover:text-orange-400 transition") Usuarios
+        // Buscador de productos centrado
+        div(class="flex-1 justify-center hidden md:flex")
+            form(method="GET" action="/admin/productos" class="flex gap-3 w-full max-w-2xl")
+                .flex-1
+                    input(
+                        type="text"
+                        name="buscar"
+                        placeholder="Buscar por nombre..."
+                        class="w-full px-4 py-2 border border-gray-300 rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm"
+                    )
+                button(
+                    type="submit"
+                    class="px-4 py-2 bg-orange-600 text-white font-medium rounded-full hover:bg-orange-700 transition shadow-md text-sm"
+                ) Buscar
 
         // Acciones (derecha)
         .flex.items-center.gap-4
-            a(href="/auth/editar-perfil" class="hidden sm:inline text-sm font-semibold hover:text-orange-400 transition") Mi Perfil
-            a(href="/auth/logout" class="inline-flex items-center gap-2 rounded-full px-4 py-2 border border-orange-500 text-sm font-semibold hover:bg-orange-500/10 transition")
+            // Menú de usuario desplegable
+            .relative
+                button#usuarioBtnAdmin(
+                    class="hidden sm:flex items-center gap-1 text-sm font-bold hover:text-orange-400 transition bg-transparent border-0 cursor-pointer text-black"
+                    type="button"
+                    aria-expanded="false"
+                )
+                    | #{usuario.nombre}
+                    svg(xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 opacity-80 transition-transform" id="usuarioIconAdmin")
+                        path(fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z" clip-rule="evenodd")
+                // Menú desplegable de usuario
+                div#usuarioMenuAdmin(class="absolute top-full right-0 mt-3 min-w-48 bg-white text-black border border-black/10 rounded-2xl p-2 hidden z-50")
+                    a(href="/auth/editar-perfil" class="block px-3 py-2 rounded-lg text-sm hover:bg-black/5 transition") Mi Perfil
+            
+            a(href="/auth/logout" class="text-orange-600 inline-flex items-center gap-2 rounded-full px-4 py-2 border border-orange-500 text-sm font-bold hover:bg-orange-500/10 transition")
                 | Cerrar Sesión
-                svg(xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4")
-                    path(fill-rule="evenodd" d="M12.75 3a.75.75 0 00-1.5 0v9.19l-2.47-2.47a.75.75 0 10-1.06 1.06l3.75 3.75a.75.75 0 001.06 0l3.75-3.75a.75.75 0 10-1.06-1.06l-2.47 2.47V3z" clip-rule="evenodd")
+
+    // Navegación centrada tipo pill
+    .max-w-7xl.mx-auto.px-4.py-4.flex.justify-center
+        nav(class="hidden md:block w-full")
+            div(class="flex items-center gap-4 bg-orange-200 rounded-full py-2 pl-5 pr-3 ring-1 ring-white/10 shadow whitespace-nowrap justify-center")
+                a(href="/dashboard" class="text-xs font-medium hover:text-orange-400 transition") Productos
+                a(href="/admin/productos" class="text-xs font-medium hover:text-orange-400 transition") Gestionar Productos
+                a(href="/admin/categorias" class="text-xs font-medium hover:text-orange-400 transition") Gestionar Categorías
+                // Categorías (desplegable interactivo)
+                .relative
+                    button#categoriasBtnAdmin(
+                        class="text-xs font-medium flex items-center gap-1 hover:text-orange-400 transition bg-transparent border-0 cursor-pointer text-black"
+                        type="button"
+                        aria-expanded="false"
+                    )
+                        | Categorías
+                        svg(xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 opacity-80 transition-transform" id="categoriasIconAdmin")
+                            path(fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z" clip-rule="evenodd")
+                    // Menú de categorías
+                    div#categoriasMenuAdmin(class="absolute top-full left-0 mt-3 min-w-56 bg-orange-200 text-black border border-orange-300 rounded-2xl p-2 hidden z-50")
+                        if categoriasMenu && categoriasMenu.length
+                            each cat in categoriasMenu
+                                a(href=`/admin/productos?categoria=${cat.id}` class="block px-3 py-2 rounded-lg text-sm hover:bg-orange-300 transition")= cat.nombre
+                        else
+                            span.block.px-3.py-2.text-sm.text-gray-500 No hay categorías
+                a(href="/admin/pedidos" class="text-xs font-medium hover:text-orange-400 transition") Gestion Pedidos
+                a(href="/auth/gestionar-usuarios" class="text-xs font-medium hover:text-orange-400 transition") Usuarios
+
+    // Buscador móvil
+    div(class="max-w-7xl mx-auto px-4 py-4 md:hidden")
+        form(method="GET" action="/admin/productos" class="flex flex-col sm:flex-row gap-3")
+            .flex-1
+                input(
+                    type="text"
+                    name="buscar"
+                    placeholder="Buscar por nombre de producto o categoría..."
+                    class="w-full px-4 py-2 border border-gray-300 rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm"
+                )
+            button(
+                type="submit"
+                class="px-6 py-2 bg-orange-600 text-white font-medium rounded-full hover:bg-orange-700 transition shadow-md text-sm"
+            ) Buscar

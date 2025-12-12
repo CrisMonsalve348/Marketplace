@@ -1,0 +1,37 @@
+extends ../layout/admin.pug
+
+block content
+  div(class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 mt-6")
+    // Encabezado con acción
+    div(class="flex items-center justify-between mb-6")
+      h1(class="text-3xl font-bold text-gray-900") Editar usuario
+      a(href="/auth/gestionar-usuarios" class="inline-flex items-center px-4 py-2 border border-orange-600 text-orange-600 text-sm font-semibold rounded-full hover:bg-orange-50 transition") Volver a gestión
+
+    if errores
+      div(class="mb-6 p-4 bg-red-100 border border-red-300 text-red-700 rounded-lg")
+        h2(class="font-bold mb-2") Errores encontrados:
+        ul(class="list-disc list-inside space-y-1")
+          each err in errores
+            li(class="text-sm")= err.msg
+
+    div(class="bg-white shadow-md rounded-xl p-6 space-y-6")
+      form(method="POST" action=`/auth/gestionar-usuarios/${usuarioEditar.id}/editar` novalidate class="space-y-5")
+        input(type="hidden" name="_csrf" value=csrfToken)
+
+        div(class="space-y-1")
+          label(for="nombre" class="block text-sm font-semibold text-gray-800") Nombre
+          input(type="text" id="nombre" name="nombre" value=usuarioEditar.nombre placeholder="Nombre completo" class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-orange-500 focus:border-orange-500 text-sm" required)
+
+        div(class="space-y-1")
+          label(for="email" class="block text-sm font-semibold text-gray-800") Correo
+          input(type="email" id="email" value=usuarioEditar.email class="appearance-none block w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-600 shadow-sm text-sm" disabled)
+
+        div(class="space-y-1")
+          label(for="role" class="block text-sm font-semibold text-gray-800") Rol
+          select(id="role" name="role" class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500 text-sm")
+            option(value="cliente" selected=(usuarioEditar.role === 'cliente')) Cliente
+            option(value="admin" selected=(usuarioEditar.role === 'admin')) Admin
+
+        div(class="flex flex-col sm:flex-row gap-3")
+          button(type="submit" class="flex-1 inline-flex justify-center items-center py-2.5 px-4 border border-transparent rounded-full shadow-md text-sm font-semibold text-white bg-orange-600 hover:bg-orange-700 transition") Guardar cambios
+          a(href="/auth/gestionar-usuarios" class="flex-1 inline-flex justify-center items-center py-2.5 px-4 border border-orange-200 rounded-full shadow text-sm font-semibold text-orange-700 bg-white hover:bg-orange-50 transition") Cancelar

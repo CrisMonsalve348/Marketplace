@@ -1,0 +1,78 @@
+extends ../layout/admin.pug
+
+block content
+  div(class="container mx-auto px-4 py-8")
+
+    // Encabezado con botones
+    div(class="flex justify-between items-center mb-8")
+      h1(class="text-3xl font-bold")= producto.nombre
+      div(class="flex gap-2")
+        a(href=`/admin/productos/${producto.id}/editar` class="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-full transition")
+          | Editar
+        a(href="/admin/productos" class="px-4 py-2 border border-orange-600 text-orange-600 hover:bg-orange-50 rounded-full transition")
+          | Volver a Productos
+
+    // Card única con imagen e información lado a lado
+    div(class="bg-white rounded-lg shadow-md overflow-hidden")
+      div(class="grid grid-cols-1 md:grid-cols-2")
+        // Imagen (izquierda)
+        div
+          if producto.imagen_principal
+            img(src=producto.imagen_principal alt=producto.nombre class="w-full h-full object-cover")
+          else
+            div(class="w-full h-96 bg-gray-200 flex items-center justify-center")
+              span(class="text-gray-500") Sin imagen disponible
+
+        // Información (derecha)
+        div(class="p-6 flex flex-col")
+          // Categoría
+          if producto.categoria
+            div(class="mb-4")
+              label(class="block text-sm font-semibold text-gray-700") Categoría
+              span(class="text-gray-600")= producto.categoria.nombre
+
+          // Precio
+          div(class="mb-4")
+            label(class="block text-sm font-semibold text-gray-700") Precio
+            span(class="text-2xl font-normal text-orange-600")= `$${Math.floor(producto.precio).toLocaleString('es-CO')}`
+
+          // Stock
+          div(class="mb-4")
+            label(class="block text-sm font-semibold text-gray-700") Stock
+            if producto.stock > 0
+              span(class="px-3 py-1 bg-green-100 text-green-800 rounded")
+                | Stock: #{producto.stock} unidades
+            else
+              span(class="px-3 py-1 bg-red-100 text-red-800 rounded")
+                | Sin stock
+
+          // Estado
+          div(class="mb-4")
+            label(class="block text-sm font-semibold text-gray-700") Estado
+            case producto.estado
+              when 'publicado'
+                span(class="px-3 py-1 bg-blue-100 text-blue-800 rounded") Publicado
+              when 'borrador'
+                span(class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded") Borrador
+              when 'no disponible'
+                span(class="px-3 py-1 bg-red-100 text-red-800 rounded") No disponible
+              default
+                span(class="text-gray-600")= producto.estado
+
+          // Fechas
+          div(class="mb-4")
+            label(class="block text-sm font-semibold text-gray-700") Creado
+            span(class="text-gray-600")= new Date(producto.fecha_creacion).toLocaleDateString('es-ES')
+
+          if producto.fecha_actualizacion
+            div(class="mb-4")
+              label(class="block text-sm font-semibold text-gray-700") Última actualización
+              span(class="text-gray-600")= new Date(producto.fecha_actualizacion).toLocaleDateString('es-ES')
+
+    // Sección de descripción
+    div(class="bg-white rounded-lg shadow-md p-6 mt-8")
+      h2(class="text-xl font-bold mb-4") Descripción
+      if producto.descripcion
+        p(class="text-gray-700 whitespace-pre-wrap")= producto.descripcion
+      else
+        p(class="text-gray-500") Sin descripción disponible

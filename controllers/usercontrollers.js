@@ -365,7 +365,8 @@ const cambiarnombre = async (req, res) => {
   const resultado = validationResult(req);
 
   if (!resultado.isEmpty()) {
-    return res.render("auth/editar-perfil", {
+    const vista = req.usuario.role === 'admin' ? 'auth/editar-perfil-admin' : 'auth/editar-perfil';
+    return res.render(vista, {
       tituloPagina: "Editar perfil",
       csrfToken: req.csrfToken(),
       errores: resultado.array(),
@@ -383,16 +384,24 @@ const cambiarnombre = async (req, res) => {
     req.usuario.nombre = req.body.nombre;
     res.locals.usuario.nombre = req.body.nombre;
 
-    return res.render("templates/mensaje", {
-      tituloPagina: "Perfil Actualizado",
+    const vista = req.usuario.role === 'admin' ? 'auth/editar-perfil-admin' : 'auth/editar-perfil';
+
+    return res.render(vista, {
+      tituloPagina: "Editar perfil",
+      csrfToken: req.csrfToken(),
+      usuario: req.usuario,
       mensaje: "Tu nombre ha sido actualizado correctamente"
     });
 
   } catch (error) {
     console.log(error); 
-      return res.render("templates/mensaje", {
-      tituloPagina: "Error al actualizar",
-      mensaje: "Hubo un error al actualizar tu nombre"
+    const vista = req.usuario.role === 'admin' ? 'auth/editar-perfil-admin' : 'auth/editar-perfil';
+    
+    return res.render(vista, {
+      tituloPagina: "Editar perfil",
+      csrfToken: req.csrfToken(),
+      usuario: req.usuario,
+      error: "Hubo un error al actualizar tu perfil"
     });
   }
 };
@@ -423,6 +432,97 @@ try{
 console.log(error);
 }
 }
+
+// formulario editar usuario (admin)
+const formularioEditarUsuarioAdmin = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const usuarioEditar = await Usuario.findByPk(id);
+
+    if (!usuarioEditar || usuarioEditar.id === req.usuario.id) {
+      return res.render("templates/mensaje", {
+        tituloPagina: "Usuario no encontrado",
+        mensaje: "El usuario no existe o no se puede editar.",
+      });
+    }
+
+    return res.render("auth/editar-usuario", {
+      tituloPagina: "Editar usuario",
+      csrfToken: req.csrfToken(),
+      usuarioEditar,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.render("templates/mensaje", {
+      tituloPagina: "Error",
+      mensaje: "No se pudo cargar la edición del usuario.",
+    });
+  }
+};
+
+// actualizar usuario (admin)
+const actualizarUsuarioAdmin = async (req, res) => {
+  const { id } = req.params;
+
+  await check("nombre")
+    .notEmpty()
+    .withMessage("El nombre no puede estar vacío")
+    .run(req);
+
+  await check("role")
+    .isIn(["admin", "cliente"])
+    .withMessage("Rol inválido")
+    .run(req);
+
+  const resultado = validationResult(req);
+
+  const usuarioEditar = await Usuario.findByPk(id);
+
+  if (!usuarioEditar || usuarioEditar.id === req.usuario.id) {
+    return res.render("templates/mensaje", {
+      tituloPagina: "Usuario no encontrado",
+      mensaje: "El usuario no existe o no se puede editar.",
+    });
+  }
+
+  if (!resultado.isEmpty()) {
+    return res.render("auth/editar-usuario", {
+      tituloPagina: "Editar usuario",
+      csrfToken: req.csrfToken(),
+      errores: resultado.array(),
+      usuarioEditar: {
+        id: usuarioEditar.id,
+        nombre: req.body.nombre,
+        email: usuarioEditar.email,
+        role: req.body.role,
+      },
+    });
+  }
+
+  try {
+    usuarioEditar.nombre = req.body.nombre;
+    usuarioEditar.role = req.body.role;
+    await usuarioEditar.save();
+
+    const usuarios = await Usuario.findAll({
+      where: { id: { [Op.ne]: req.usuario.id } },
+    });
+
+    return res.render("auth/gestionar-usuarios", {
+      tituloPagina: "Gestion de Usuarios",
+      csrfToken: req.csrfToken(),
+      usuarios,
+      mensaje: "Usuario actualizado correctamente",
+    });
+  } catch (error) {
+    console.log(error);
+    return res.render("templates/mensaje", {
+      tituloPagina: "Error",
+      mensaje: "Hubo un error al actualizar el usuario.",
+    });
+  }
+};
 
 //eliminar usuario
 const eliminarusuario=async(req,res)=>{
@@ -495,5 +595,7 @@ export {
     cambiarnombre,
     logout,
     vistadegestiondeusuarios,
-    eliminarusuario
+    eliminarusuario,
+    formularioEditarUsuarioAdmin,
+    actualizarUsuarioAdmin
   }
