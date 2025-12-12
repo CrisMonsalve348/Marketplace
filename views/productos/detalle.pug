@@ -1,67 +1,107 @@
 extends ../layout/app.pug
 
 block content
-  .producto-detalle-container
-    .producto-imagen-section
-      if producto.imagen_principal
-        img(src=producto.imagen_principal alt=producto.nombre class="producto-imagen-grande")
-      else
-        div.sin-imagen Producto sin imagen
-
-    .producto-info-section
-      h1= producto.nombre
-      
-      if producto.categoria
-        .categoria-badge
-          a(href=`/productos?categoria=${producto.categoria.id}`)= producto.categoria.nombre
-      
-      .precio-section
-        span.precio-grande $#{parseFloat(producto.precio).toFixed(2)}
+  div(class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6")
+    
+    // CSRF Token oculto
+    input(type="hidden" name="_csrf" value=csrfToken)
+    
+    // Producto principal
+    div(class="bg-white rounded-xl shadow-md overflow-hidden mb-8")
+      div(class="grid grid-cols-1 lg:grid-cols-2 gap-8 p-6 lg:p-8")
         
-        if producto.estado === 'no disponible'
-          span.badge-no-disponible ✖ No disponible
-        else if producto.stock > 0
-          span.stock-disponible ✓ Stock disponible: #{producto.stock} unidades
-        else
-          span.sin-stock ✗ Sin stock
-
-      .descripcion-completa
-        h2 Descripción
-        p= producto.descripcion || "Sin descripción disponible"
-
-      .acciones-producto
-        if producto.estado === 'no disponible'
-          button.btn.btn-secondary(disabled) No disponible
-        else if producto.stock > 0 && producto.estado === 'publicado'
-          .input-group
-            input.form-control(type="number", id="cantidad", min="1", max=producto.stock, value="1", style="max-width: 100px;")
-            button.btn.btn-primary.btn-agregar-carrito(data-producto-id=producto.id, data-nombre=producto.nombre, data-precio=producto.precio, type="button")
-              | Agregar al carrito
-        else
-          button.btn.btn-secondary(disabled) Sin stock
+        // Sección de imagen
+        div(class="flex items-center justify-center")
+          if producto.imagen_principal
+            img(src=producto.imagen_principal alt=producto.nombre class="w-full h-auto max-h-96 object-contain rounded-lg")
+          else
+            div(class="w-full h-96 flex items-center justify-center bg-gray-200 rounded-lg")
+              svg(xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-24 h-24 text-gray-400")
+                path(d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z")
         
-        a.btn.btn-outline-secondary.ms-2(href="/productos") Seguir comprando
-
-  if relacionados.length > 0
-    .productos-relacionados
-      h2 Productos relacionados
-      .productos-grid
-        each p in relacionados
-          .producto-card
-            if p.imagen_principal
-              img(src=p.imagen_principal alt=p.nombre class="producto-imagen")
+        // Sección de información
+        div
+          // Nombre del producto
+          h1(class="text-3xl font-bold text-gray-900 mb-4")= producto.nombre
+          
+          // Categoría
+          if producto.categoria
+            a(href=`/productos?categoria=${producto.categoria.id}` class="inline-block mb-4")
+              span(class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-700 hover:bg-orange-200 transition")
+                | #{producto.categoria.nombre}
+          
+          // Precio
+          div(class="mb-6")
+            p(class="text-4xl font-bold text-gray-900 mb-3") $#{Math.floor(producto.precio).toLocaleString('es-CO')}
             
-            h3.producto-nombre
-              a(href=`/productos/${p.id}`)= p.nombre
-            
-            .producto-precio
-              span.precio $#{parseFloat(p.precio).toFixed(2)}
-            
-            .producto-stock
-              if p.stock > 0
-                span.stock-disponible Stock: #{p.stock}
+            // Estado y Stock
+            div(class="flex items-center gap-2")
+              if producto.estado === 'no disponible'
+                span(class="inline-flex items-center px-3 py-1 rounded text-sm font-medium bg-gray-100 text-gray-800")
+                  | ✖ No disponible
+              else if producto.stock > 0
+                span(class="inline-flex items-center px-3 py-1 rounded text-sm font-medium bg-green-100 text-green-800")
+                  | Stock disponible: #{producto.stock} unidades
               else
-                span.sin-stock Sin stock
+                span(class="inline-flex items-center px-3 py-1 rounded text-sm font-medium bg-red-100 text-red-800")
+                  | Sin stock
+
+          // Descripción
+          div(class="mb-6")
+            h2(class="text-xl font-bold text-gray-900 mb-3") Descripción
+            p(class="text-gray-700 leading-relaxed")= producto.descripcion || "Sin descripción disponible"
+
+          // Acciones
+          div(class="space-y-3")
+            if producto.estado === 'no disponible'
+              button(class="w-full px-6 py-3 bg-gray-300 text-gray-600 font-semibold rounded-full cursor-not-allowed" disabled)
+                | No disponible
+            else if producto.stock > 0 && producto.estado === 'publicado'
+              div(class="flex gap-3 items-center")
+                div(class="flex items-center gap-2")
+                  label(for="cantidad" class="text-sm font-medium text-gray-700") Cantidad:
+                  input(type="number" id="cantidad" min="1" max=producto.stock value="1" class="w-20 px-3 py-2 border border-gray-300 rounded-full text-center focus:ring-orange-500 focus:border-orange-500")
+                button(class="flex-1 px-6 py-3 bg-orange-600 text-white font-semibold rounded-full hover:bg-orange-700 transition cursor-pointer btn-agregar-carrito" data-producto-id=producto.id data-nombre=producto.nombre data-precio=producto.precio type="button")
+                  | Agregar al carrito
+            else
+              button(class="w-full px-6 py-3 bg-gray-300 text-gray-600 font-semibold rounded-full cursor-not-allowed" disabled)
+                | Sin stock
+            
+            a(href="/productos" class="block w-full text-center px-6 py-3 border border-orange-200 text-orange-700 text-sm font-semibold rounded-full hover:bg-orange-50 transition cursor-pointer")
+              | Seguir comprando
+
+  // Productos relacionados
+  if relacionados.length > 0
+    div(class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 mb-8")
+      h2(class="text-2xl font-bold text-gray-900 mb-6") Productos relacionados
+      
+      div(class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6")
+        each p in relacionados
+          div(class="bg-white rounded-xl shadow-md hover:shadow-xl transition overflow-hidden cursor-pointer")
+            // Imagen
+            div(class="relative w-full h-48 bg-gray-200 overflow-hidden")
+              if p.imagen_principal
+                img(src=p.imagen_principal alt=p.nombre class="w-full h-full object-cover hover:scale-105 transition duration-300")
+              else
+                div(class="w-full h-full flex items-center justify-center bg-gray-300")
+                  svg(xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-12 h-12 text-gray-400")
+                    path(d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z")
+            
+            // Contenido
+            div(class="p-4")
+              h3(class="text-lg font-bold text-gray-900 mb-2 line-clamp-2")
+                a(href=`/productos/${p.id}` class="hover:text-orange-600 transition")= p.nombre
+              
+              div(class="flex items-center justify-between mb-3")
+                p(class="text-xl font-bold text-gray-900") $#{Math.floor(p.precio).toLocaleString('es-CO')}
+              
+              div(class="flex items-center gap-2")
+                if p.stock > 0
+                  span(class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800")
+                    | Stock: #{p.stock}
+                else
+                  span(class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800")
+                    | Sin stock
 
 block scripts
   script.

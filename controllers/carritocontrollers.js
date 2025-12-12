@@ -112,7 +112,11 @@ const verCarrito = async (req, res) => {
 
     const items = await CarritoItem.findAll({
       where: { carrito_id: carrito.id },
-      include: [{ model: Producto, attributes: ["id", "nombre", "imagen_principal"] }],
+      include: [{ 
+        model: Producto, 
+        attributes: ["id", "nombre", "imagen_principal", "stock"],
+        required: true // Esto filtrará los items con productos eliminados
+      }],
     });
 
     const subtotal = items.reduce(
@@ -228,7 +232,11 @@ const formularioCheckout = async (req, res) => {
 
     const items = await CarritoItem.findAll({
       where: { carrito_id: carrito.id },
-      include: [{ model: Producto }],
+      include: [{ 
+        model: Producto,
+        attributes: ["id", "nombre", "stock"],
+        required: true
+      }],
     });
 
     if (items.length === 0) {
@@ -282,7 +290,11 @@ const procesarCheckout = async (req, res) => {
       const carrito = await obtenerCarrito(req.usuario.id);
       const items = await CarritoItem.findAll({
         where: { carrito_id: carrito.id },
-        include: [{ model: Producto }],
+        include: [{ 
+          model: Producto,
+          attributes: ["id", "nombre", "stock"],
+          required: true
+        }],
       });
       const subtotal = items.reduce(
         (sum, i) => sum + parseFloat(i.precio_unitario) * i.cantidad,
@@ -305,7 +317,11 @@ const procesarCheckout = async (req, res) => {
 
     const items = await CarritoItem.findAll({
       where: { carrito_id: carrito.id },
-      include: [{ model: Producto }],
+      include: [{
+        model: Producto,
+        attributes: ["id", "nombre", "stock", "estado"],
+        required: true,
+      }],
     });
 
     if (items.length === 0) {

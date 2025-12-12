@@ -1,46 +1,59 @@
 extends ./layout/app.pug
 
 block content
-  h1 Bienvenido a OpenTrade
-  
-  if usuario
-    p ¡Hola, #{usuario.nombre}!
-    .user-actions
-      a(href="/productos") Ver productos
-      a(href="/auth/editar-perfil") Mi perfil
-      a(href="/auth/logout") Cerrar sesión
-  else
-    p Descubre nuestros productos y servicios
-    .guest-actions
-      a(href="/auth/registro") Registrarse
-      a(href="/auth/login") Iniciar sesión
-  
-  if productos.length
-    section.productos-destacados
-      h2 Productos destacados
-      .productos-grid
-        each producto in productos
-          .producto-card
-            if producto.imagen_principal
-              a(href=`/productos/${producto.id}`)
-                img(src=producto.imagen_principal alt=producto.nombre class="producto-imagen")
-            
-            h3.producto-nombre
-              a(href=`/productos/${producto.id}`)= producto.nombre
-            
-            if producto.descripcion
-              p.producto-descripcion= producto.descripcion.substring(0, 80) + '...'
-            
-            .producto-precio
-              span.precio $#{parseFloat(producto.precio).toFixed(2)}
-            
-            .producto-stock
-              if producto.stock > 0
-                span.stock-disponible Stock: #{producto.stock}
-              else
-                span.sin-stock Sin stock
-            
-            a.btn-ver-detalle(href=`/productos/${producto.id}`) Ver detalle
-    
-    .ver-todos
-      a(href="/productos" class="btn-primary") Ver todos los productos
+  // Mensaje de bienvenida
+  div(class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 text-center")
+    h1(class="text-3xl font-bold text-gray-900 mb-4") Bienvenido a OpenTrade
+
+    if usuario
+      p(class="text-lg text-gray-700") ¡Hola, #{usuario.nombre}!
+
+  // Sección de productos destacados
+  div(class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-10")
+    h2(class="text-2xl font-bold mb-6 text-gray-900") Productos Destacados
+
+    if productos && productos.length > 0
+      div
+        div(class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6")
+          each producto in productos
+            // Card de producto
+            div(class="bg-white rounded-xl shadow-md hover:shadow-xl transition overflow-hidden")
+              // Imagen
+              div(class="relative w-full h-48 bg-gray-200 overflow-hidden")
+                if producto.imagen_principal
+                  img(src=producto.imagen_principal alt=producto.nombre class="w-full h-full object-cover hover:scale-105 transition duration-300")
+                else
+                  div(class="w-full h-full flex items-center justify-center bg-gray-300")
+                    svg(xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-12 h-12 text-gray-400")
+                      path(d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z")
+              
+              // Contenido
+              div(class="p-4")
+                // Nombre
+                h3(class="text-xl font-bold text-gray-900 mb-2 line-clamp-2")= producto.nombre
+                
+                // Categoría
+                if producto.categoria && producto.categoria.nombre
+                  p(class="text-xs text-orange-600 font-medium mb-3")= producto.categoria.nombre
+
+                // Precio
+                div(class="flex items-center justify-between mb-3")
+                  p(class="text-2xl font-normal text-gray-900") $#{Math.floor(producto.precio).toLocaleString('es-CO')}
+                  
+                // Stock
+                div(class="flex items-center gap-2 mb-4")
+                  if producto.stock > 0
+                    span(class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800")
+                      | Stock: #{producto.stock}
+                  else
+                    span(class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800")
+                      | Sin stock
+
+                // Acciones
+                div(class="flex gap-2")
+                  a(href=`/productos/${producto.id}` class="w-full inline-flex items-center justify-center px-4 py-2 border border-orange-200 text-orange-700 text-sm font-semibold rounded-full hover:bg-orange-50 transition")
+                    | Ver
+
+    else
+      div(class="bg-white rounded-xl shadow-md p-8 text-center")
+        p(class="text-gray-600 mb-4") No hay productos disponibles.

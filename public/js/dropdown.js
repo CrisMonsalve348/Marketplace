@@ -142,6 +142,48 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // Header app - Menú de usuario
+  const btnUsuarioApp = document.getElementById('usuarioBtnApp');
+  const menuUsuarioApp = document.getElementById('usuarioMenuApp');
+  const iconUsuarioApp = document.getElementById('usuarioIconApp');
+
+  if (btnUsuarioApp && menuUsuarioApp) {
+    btnUsuarioApp.addEventListener('click', (e) => {
+      e.preventDefault();
+      menuUsuarioApp.classList.toggle('hidden');
+      if (iconUsuarioApp) {
+        iconUsuarioApp.style.transform = menuUsuarioApp.classList.contains('hidden')
+          ? 'rotate(0deg)'
+          : 'rotate(180deg)';
+      }
+      btnUsuarioApp.setAttribute('aria-expanded', !menuUsuarioApp.classList.contains('hidden'));
+    });
+
+    btnUsuarioApp.addEventListener('mouseenter', () => {
+      menuUsuarioApp.classList.remove('hidden');
+      if (iconUsuarioApp) iconUsuarioApp.style.transform = 'rotate(180deg)';
+    });
+
+    btnUsuarioApp.parentElement.addEventListener('mouseleave', () => {
+      setTimeout(() => {
+        if (!btnUsuarioApp.parentElement.querySelector(':hover')) {
+          menuUsuarioApp.classList.add('hidden');
+          if (iconUsuarioApp) iconUsuarioApp.style.transform = 'rotate(0deg)';
+          btnUsuarioApp.setAttribute('aria-expanded', 'false');
+        }
+      }, 100);
+    });
+
+    const linksUsuarioApp = menuUsuarioApp.querySelectorAll('a');
+    linksUsuarioApp.forEach((link) => {
+      link.addEventListener('click', () => {
+        menuUsuarioApp.classList.add('hidden');
+        if (iconUsuarioApp) iconUsuarioApp.style.transform = 'rotate(0deg)';
+        btnUsuarioApp.setAttribute('aria-expanded', 'false');
+      });
+    });
+  }
+
   // Cerrar menús al hacer click fuera
   document.addEventListener('click', (e) => {
     if (
@@ -174,6 +216,17 @@ document.addEventListener('DOMContentLoaded', () => {
         menuUsuarioAdmin.classList.add('hidden');
         if (iconUsuarioAdmin) iconUsuarioAdmin.style.transform = 'rotate(0deg)';
         if (btnUsuarioAdmin) btnUsuarioAdmin.setAttribute('aria-expanded', 'false');
+      }
+    }
+
+    if (
+      !e.target.closest('#usuarioBtnApp') &&
+      !e.target.closest('#usuarioMenuApp')
+    ) {
+      if (menuUsuarioApp && !menuUsuarioApp.classList.contains('hidden')) {
+        menuUsuarioApp.classList.add('hidden');
+        if (iconUsuarioApp) iconUsuarioApp.style.transform = 'rotate(0deg)';
+        if (btnUsuarioApp) btnUsuarioApp.setAttribute('aria-expanded', 'false');
       }
     }
   });

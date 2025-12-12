@@ -182,8 +182,17 @@ const listadoPublico = async (req, res) => {
 
     const categorias = await Categoria.findAll({ where: { estado: "activo" } });
 
+    // Obtener nombre de categoría si hay filtro por categoría
+    let nombreCategoria = null;
+    if (categoria) {
+      const categoriaSeleccionada = await Categoria.findByPk(categoria);
+      if (categoriaSeleccionada) {
+        nombreCategoria = categoriaSeleccionada.nombre;
+      }
+    }
+
     return res.render("productos/listado", {
-      pagina: "Productos",
+      pagina: nombreCategoria || "Productos",
       productos,
       categorias,
       filtros: { categoria, precioMin, precioMax, orden, buscar },
@@ -337,6 +346,7 @@ const verDetalle = async (req, res) => {
     pagina: producto.nombre,
     producto,
     relacionados,
+    csrfToken: req.csrfToken(),
   });
 };
 

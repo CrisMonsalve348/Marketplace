@@ -1,69 +1,94 @@
 extends ../layout/app.pug
 
 block content
-  .productos-page
-    h1= pagina
+  div(class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6")
     
-    .filtros-section
-      form.filtros-form(method="GET" action="/productos")
-        .filtro-grupo
-          label(for="buscar") Buscar
-          input(type="text" id="buscar" name="buscar" placeholder="Nombre o descripción..." value=(filtros && filtros.buscar) || "")
-        
-        .filtro-grupo
-          label(for="categoria") Categoría
-          select(id="categoria" name="categoria")
-            option(value="") Todas las categorías
-            each cat in categorias
-              option(value=cat.id selected=(filtros && filtros.categoria == cat.id))= cat.nombre
-        
-        .filtro-grupo
-          label(for="precioMin") Precio mínimo
-          input(type="number" id="precioMin" name="precioMin" placeholder="0" step="1000" value=(filtros && filtros.precioMin) || "")
-        
-        .filtro-grupo
-          label(for="precioMax") Precio máximo
-          input(type="number" id="precioMax" name="precioMax" placeholder="9999999" step="1000" value=(filtros && filtros.precioMax) || "")
-        
-        .filtro-grupo
-          label(for="orden") Ordenar por
-          select(id="orden" name="orden")
-            option(value="reciente" selected=(!(filtros && filtros.orden) || filtros.orden === 'reciente')) Más recientes
-            option(value="nombre" selected=(filtros && filtros.orden === 'nombre')) Nombre (A-Z)
-            option(value="precioAsc" selected=(filtros && filtros.orden === 'precioAsc')) Precio menor a mayor
-            option(value="precioDesc" selected=(filtros && filtros.orden === 'precioDesc')) Precio mayor a menor
-        
-        .filtro-acciones
-          button(type="submit") Aplicar filtros
-          a(href="/productos") Limpiar filtros
+    // Título
+    h1(class="text-3xl font-bold text-gray-900 mb-8")= pagina
     
+    // Filtros
+    form(method="GET" action="/productos" class="mb-8")
+      div(class="bg-white rounded-xl shadow-md p-6")
+        div(class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4")
+          
+          // Categoría
+          div
+            label(for="categoria" class="block text-sm font-medium text-gray-700 mb-2") Categoría
+            select(id="categoria" name="categoria" class="w-full px-4 py-2 border border-gray-300 rounded-2xl focus:ring-orange-500 focus:border-orange-500 text-sm bg-white shadow-sm appearance-none cursor-pointer" style="background-image: url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 20 20%22 fill=%22currentColor%22%3E%3Cpath fill-rule=%22evenodd%22 d=%22M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z%22 clip-rule=%22evenodd%22/%3E%3C/svg%3E'); background-repeat: no-repeat; background-position: right 0.75rem center; background-size: 1rem; padding-right: 2.5rem;")
+              option(value="") Todas las categorías
+              each cat in categorias
+                option(value=cat.id selected=(filtros && filtros.categoria == cat.id))= cat.nombre
+          
+          // Precio mínimo
+          div
+            label(for="precioMin" class="block text-sm font-medium text-gray-700 mb-2") Precio mínimo
+            input(type="number" id="precioMin" name="precioMin" placeholder="0" value=(filtros && filtros.precioMin) || "" class="w-full px-4 py-2 border border-gray-300 rounded-full focus:ring-orange-500 focus:border-orange-500 text-sm")
+          
+          // Precio máximo
+          div
+            label(for="precioMax" class="block text-sm font-medium text-gray-700 mb-2") Precio máximo
+            input(type="number" id="precioMax" name="precioMax" placeholder="9999999" value=(filtros && filtros.precioMax) || "" class="w-full px-4 py-2 border border-gray-300 rounded-full focus:ring-orange-500 focus:border-orange-500 text-sm")
+          
+          // Ordenar por
+          div
+            label(for="orden" class="block text-sm font-medium text-gray-700 mb-2") Ordenar por
+            select(id="orden" name="orden" class="w-full px-4 py-2 border border-gray-300 rounded-full focus:ring-orange-500 focus:border-orange-500 text-sm")
+              option(value="reciente" selected=(!(filtros && filtros.orden) || filtros.orden === 'reciente')) Más recientes
+              option(value="nombre" selected=(filtros && filtros.orden === 'nombre')) Nombre (A-Z)
+              option(value="precioAsc" selected=(filtros && filtros.orden === 'precioAsc')) Precio menor a mayor
+              option(value="precioDesc" selected=(filtros && filtros.orden === 'precioDesc')) Precio mayor a menor
+        
+        // Botones de acción
+        div(class="flex gap-3 justify-end")
+          a(href="/productos" class="px-6 py-2 border border-orange-200 text-orange-700 text-sm font-semibold rounded-full hover:bg-orange-50 transition")
+            | Limpiar
+          button(type="submit" class="px-6 py-2 bg-orange-600 text-white text-sm font-semibold rounded-full hover:bg-orange-700 transition cursor-pointer")
+            | Aplicar filtros
+    
+    // Grid de productos
     if productos.length
-      .productos-grid
+      div(class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6")
         each producto in productos
-          .producto-card
-            if producto.imagen_principal
-              a(href=`/productos/${producto.id}`)
-                img(src=producto.imagen_principal alt=producto.nombre class="producto-imagen")
-            else
-              div.sin-imagen
-            
-            h2.producto-nombre
-              a(href=`/productos/${producto.id}`)= producto.nombre
-            
-            if producto.descripcion
-              p.producto-descripcion= producto.descripcion.substring(0, 100) + (producto.descripcion.length > 100 ? '...' : '')
-            
-            .producto-precio
-              span.precio $#{parseFloat(producto.precio).toFixed(2)}
-            
-            .producto-stock
-              if producto.estado === 'no disponible'
-                span.badge-no-disponible No disponible
-              else if producto.stock > 0
-                span.stock-disponible Stock disponible: #{producto.stock}
+          div(class="bg-white rounded-xl shadow-md hover:shadow-xl transition overflow-hidden")
+            // Imagen
+            div(class="relative w-full h-48 bg-gray-200 overflow-hidden")
+              if producto.imagen_principal
+                img(src=producto.imagen_principal alt=producto.nombre class="w-full h-full object-cover hover:scale-105 transition duration-300")
               else
-                span.sin-stock Sin stock
+                div(class="w-full h-full flex items-center justify-center bg-gray-300")
+                  svg(xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-12 h-12 text-gray-400")
+                    path(d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z")
             
-            a.btn-ver-detalle(href=`/productos/${producto.id}`) Ver detalle
+            // Contenido
+            div(class="p-4")
+              // Nombre
+              h3(class="text-xl font-bold text-gray-900 mb-2 line-clamp-2")= producto.nombre
+              
+              // Categoría
+              if producto.categoria && producto.categoria.nombre
+                p(class="text-xs text-orange-600 font-medium mb-3")= producto.categoria.nombre
+
+              // Precio
+              div(class="flex items-center justify-between mb-3")
+                p(class="text-2xl font-normal text-gray-900") $#{Math.floor(producto.precio).toLocaleString('es-CO')}
+              
+              // Stock y Estado en fila
+              div(class="flex items-center gap-2 mb-4")
+                if producto.estado === 'no disponible'
+                  span(class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800")
+                    | No disponible
+                else if producto.stock > 0
+                  span(class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800")
+                    | Stock: #{producto.stock}
+                else
+                  span(class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800")
+                    | Sin stock
+
+              // Acciones
+              div(class="flex gap-2")
+                a(href=`/productos/${producto.id}` class="w-full inline-flex items-center justify-center px-4 py-2 border border-orange-200 text-orange-700 text-sm font-semibold rounded-full hover:bg-orange-50 transition")
+                  | Ver
+
     else
-      p.sin-productos No hay productos que coincidan con tu búsqueda.
+      div(class="bg-white rounded-xl shadow-md p-8 text-center")
+        p(class="text-gray-600 mb-4") No hay productos que coincidan con los filtros seleccionados.
