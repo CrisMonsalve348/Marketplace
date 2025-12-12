@@ -44,13 +44,6 @@ const registrar = async(req, res) =>{
     .withMessage("La contraseña no es igual")
     .run(req);
 
-  await check("role")
-    .notEmpty()
-    .withMessage("Debes seleccionar un rol")
-    .isIn(["cliente", "admin"])
-    .withMessage("Rol inválido")
-    .run(req);
-
   let resultado = validationResult(req);
    // Verificar que el resultado este vacio
   if (!resultado.isEmpty()) {
@@ -67,7 +60,8 @@ const registrar = async(req, res) =>{
     });
   }
     // Extraer los datos
-  const { nombre, email, password, role } = req.body;
+  const { nombre, email, password } = req.body;
+  const role = 'cliente'; // Rol predeterminado
 
   // Validar que el usuario no exista
   const existeUsuario = await Usuario.findOne({
@@ -103,7 +97,7 @@ const registrar = async(req, res) =>{
   // Mostrar mensaje de Confirmación
   res.render("templates/mensaje", {
     tituloPagina: "Cuenta Creada",
-    mensaje: "Se ha enviado un correo de confirmación, Da clic en el enlace.",
+    mensaje: "Se ha enviado un correo de confirmación, revisa tu bandeja de entrada y haz clic en el enlace.",
   });
 };
 

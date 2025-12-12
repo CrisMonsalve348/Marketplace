@@ -150,8 +150,7 @@ block scripts
         });
         
         if (response.ok) {
-          alert('Estado actualizado correctamente');
-          location.reload();
+          window.location.href = `/admin/pedidos/#{pedido.id}`;
         } else {
           const data = await response.json();
           alert('Error: ' + data.error);
