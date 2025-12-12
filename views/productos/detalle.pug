@@ -1,0 +1,104 @@
+extends ../layout/app.pug
+
+block content
+  .producto-detalle-container
+    .producto-imagen-section
+      if producto.imagen_principal
+        img(src=producto.imagen_principal alt=producto.nombre class="producto-imagen-grande")
+      else
+        div.sin-imagen Producto sin imagen
+
+    .producto-info-section
+      h1= producto.nombre
+      
+      if producto.categoria
+        .categoria-badge
+          a(href=`/productos?categoria=${producto.categoria.id}`)= producto.categoria.nombre
+      
+      .precio-section
+        span.precio-grande $#{parseFloat(producto.precio).toFixed(2)}
+        
+        if producto.estado === 'no disponible'
+          span.badge-no-disponible ✖ No disponible
+        else if producto.stock > 0
+          span.stock-disponible ✓ Stock disponible: #{producto.stock} unidades
+        else
+          span.sin-stock ✗ Sin stock
+
+      .descripcion-completa
+        h2 Descripción
+        p= producto.descripcion || "Sin descripción disponible"
+
+      .acciones-producto
+        if producto.estado === 'no disponible'
+          button.btn.btn-secondary(disabled) No disponible
+        else if producto.stock > 0 && producto.estado === 'publicado'
+          .input-group
+            input.form-control(type="number", id="cantidad", min="1", max=producto.stock, value="1", style="max-width: 100px;")
+            button.btn.btn-primary.btn-agregar-carrito(data-producto-id=producto.id, data-nombre=producto.nombre, data-precio=producto.precio, type="button")
+              | Agregar al carrito
+        else
+          button.btn.btn-secondary(disabled) Sin stock
+        
+        a.btn.btn-outline-secondary.ms-2(href="/productos") Seguir comprando
+
+  if relacionados.length > 0
+    .productos-relacionados
+      h2 Productos relacionados
+      .productos-grid
+        each p in relacionados
+          .producto-card
+            if p.imagen_principal
+              img(src=p.imagen_principal alt=p.nombre class="producto-imagen")
+            
+            h3.producto-nombre
+              a(href=`/productos/${p.id}`)= p.nombre
+            
+            .producto-precio
+              span.precio $#{parseFloat(p.precio).toFixed(2)}
+            
+            .producto-stock
+              if p.stock > 0
+                span.stock-disponible Stock: #{p.stock}
+              else
+                span.sin-stock Sin stock
+
+block scripts
+  script.
+    // Attach handlers only to enabled add-to-cart buttons
+    document.querySelectorAll('.btn-agregar-carrito').forEach(function(btn){
+      if (!btn || btn.disabled) return; // skip disabled buttons
+
+      btn.addEventListener('click', async function(e){
+        e.preventDefault();
+
+        const productoId = this.getAttribute('data-producto-id');
+        const nombre = this.getAttribute('data-nombre');
+        // prefer local quantity input if present
+        const cantidadEl = document.getElementById('cantidad');
+        const cantidad = (cantidadEl && cantidadEl.value) ? cantidadEl.value : 1;
+
+        try {
+          const response = await fetch('/carrito/agregar', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'CSRF-Token': document.querySelector('input[name="_csrf"]')?.value || ''
+            },
+            body: JSON.stringify({ producto_id: productoId, cantidad: cantidad })
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            alert(`"${nombre}" agregado al carrito (${data.carritoItems} artículos)`);
+            setTimeout(() => window.location.href = '/carrito', 1000);
+          } else {
+            const data = await response.json();
+            alert('Error: ' + (data.error || 'Error agregando al carrito'));
+          }
+        } catch (err) {
+          console.error('Error agregando al carrito:', err);
+          alert('Error agregando al carrito');
+        }
+      });
+    });

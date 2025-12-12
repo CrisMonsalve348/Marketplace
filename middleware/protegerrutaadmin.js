@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import { Usuarios} from "../models/index.js";
+import { Usuario} from "../models/index.js";
 
 const protegerRutaadmin = async (req, res, next) => {
   // Verificar si hay un token
@@ -13,7 +13,7 @@ const protegerRutaadmin = async (req, res, next) => {
     const decoded = jwt.verify(_token, process.env.JWT_SECRET);
 
     // Buscar el usuario autenticado
-    const usuario = await Usuarios.scope("eliminarPassword").findByPk(
+    const usuario = await Usuario.scope("eliminarPassword").findByPk(
       decoded.id
     );
 

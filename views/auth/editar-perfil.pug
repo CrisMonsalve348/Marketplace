@@ -1,23 +1,21 @@
-extends ../layout/index
+extends ../layout/app.pug
 
-block contenido
+block content
+    div(class="mx-auto max-w-md px-4 mt-6")
+        div(class="bg-white py-8 px-4 shadow rounded-lg")
 
-    h1 MarketPlace
-        span OLX
-    h2 tituloPagina
+            if errores
+                div.mb-6.p-3.bg-red-100.border.border-red-400.text-red-700.rounded
+                    each error in errores
+                        p.text-sm.font-medium= error.msg
 
-    if errores
-        div
-            each error in errores
-                p= error.msg
+            form(method="POST" action="/auth/editar-perfil" noValidate)
+                input(type="hidden" name="_csrf" value=csrfToken )
 
-    form(method="POST" action="editar-perfil" noValidate)
-        input(type="hidden" name="_csrf" value=csrfToken )
-    
-        label(for="nombre") Nombre
-        input#nombre(type="text" name="nombre" placeholder=usuario.nombre)
+                div.mb-5
+                    label.block.text-sm.font-medium.text-gray-700(for="nombre") Nombre
+                    .mt-1
+                        input#nombre(class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" type="text" name="nombre" placeholder=usuario.nombre required)
 
-
-         
-
-        button(type="submit") Cambiar datos
+                div
+                    button(type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500") Cambiar datos

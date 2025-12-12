@@ -1,0 +1,62 @@
+extends ../layout/app.pug
+
+block content
+  .container.my-5
+    h1 Finalizar Pedido
+
+    if errores && errores.length > 0
+      .alert.alert-danger
+        h5 Errores:
+        ul
+          each error in errores
+            li= error.msg
+
+    .row
+      .col-md-8
+        .card
+          .card-body
+            h5.card-title Datos de Envío
+            
+            form(action="/carrito/procesar", method="POST")
+              input(type="hidden", name="_csrf", value=csrfToken)
+              
+              .mb-3
+                label.form-label(for="direccion_envio") Dirección de Envío
+                textarea.form-control(id="direccion_envio", name="direccion_envio", rows="4", placeholder="Ej: Calle 123, Apartamento 456, Ciudad")= direccion_envio || ''
+                small.form-text.text-muted Incluye calle, número, apartamento (si aplica) y ciudad
+              
+              .mb-3
+                label.form-label(for="metodo_pago") Método de Pago
+                select.form-select(id="metodo_pago", name="metodo_pago")
+                  option(value="") Selecciona un método
+                  option(value="contra_entrega") Contra Entrega
+                  option(value="tarjeta") Tarjeta de Crédito
+                  option(value="transferencia") Transferencia Bancaria
+              
+              button.btn.btn-primary.btn-lg.mt-3(type="submit") Confirmar Pedido
+
+      .col-md-4
+        .card
+          .card-body
+            h5.card-title Resumen del Pedido
+            
+            .list-group.list-group-flush.mb-3
+              each item in items
+                .list-group-item
+                  .d-flex.justify-content-between
+                    span= `${item.Producto.nombre} x${item.cantidad}`
+                    span $#{(parseFloat(item.precio_unitario) * item.cantidad).toFixed(2)}
+            
+            hr
+            
+            .d-flex.justify-content-between.mb-2
+              strong Subtotal:
+              span $#{subtotal}
+            
+            .d-flex.justify-content-between.fs-5
+              strong Total:
+              strong.text-success= `$${total}`
+            
+            hr
+            
+            a.btn.btn-secondary.btn-sm.btn-block(href="/carrito") ← Volver al Carrito

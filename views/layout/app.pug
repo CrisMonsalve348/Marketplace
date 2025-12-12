@@ -1,0 +1,20 @@
+doctype html
+html(lang="en")
+    head
+        meta(charset="UTF-8")
+        meta(name="viewport", content="width=device-width, initial-scale=1.0")
+        title #{pagina || 'Marketplace'} | OpenTrade
+        link(rel="stylesheet", href="/css/style.css")
+        block styles
+    body.min-h-screen.bg-gray-50 
+        include includes/header-app
+        
+        main(class="mx-auto container mt-10 px-2")
+            if errores
+                div.errores
+                    each error in errores
+                        p= error.msg
+
+            block content
+
+        block scripts

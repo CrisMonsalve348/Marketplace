@@ -1,0 +1,51 @@
+extends ../layout/admin.pug
+
+block content
+  div(class="mx-auto max-w-7xl px-4 mt-6")
+    div(class="flex items-center justify-between mb-6")
+      h1(class="text-3xl font-bold text-gray-900")= pagina
+      a(href="/admin/productos/nuevo" class="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-md transition") 
+        span(class="mr-2") +
+        | Nuevo producto
+    
+    if productos.length
+      div(class="bg-white shadow rounded-lg overflow-hidden")
+        table(class="min-w-full divide-y divide-gray-200")
+          thead(class="bg-gray-50")
+            tr
+              th(class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider") ID
+              th(class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider") Nombre
+              th(class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider") Descripción
+              th(class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider") Precio
+              th(class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider") Stock
+              th(class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider") Estado
+              th(class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider") Imagen
+              th(class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider") Acciones
+          tbody(class="bg-white divide-y divide-gray-200")
+            each p in productos
+              tr(class="hover:bg-gray-50 transition")
+                td(class="px-6 py-4 whitespace-nowrap text-sm text-gray-900")= p.id
+                td(class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900")= p.nombre
+                td(class="px-6 py-4 text-sm text-gray-600")
+                  span(title=p.descripcion)= p.descripcion ? p.descripcion.substring(0, 50) + '...' : '-'
+                td(class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900") $#{parseFloat(p.precio).toFixed(2)}
+                td(class="px-6 py-4 whitespace-nowrap text-sm")
+                  span(class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium" + (p.stock > 0 ? ' bg-green-100 text-green-800' : ' bg-red-100 text-red-800'))= p.stock
+                td(class="px-6 py-4 whitespace-nowrap text-sm")
+                  span(class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium" + (p.estado === 'publicado' ? ' bg-blue-100 text-blue-800' : p.estado === 'no disponible' ? ' bg-gray-100 text-gray-800' : ' bg-yellow-100 text-yellow-800'))= p.estado
+                td(class="px-6 py-4 whitespace-nowrap text-sm")
+                  if p.imagen_principal
+                    img(src=p.imagen_principal width="50" height="50" alt=p.nombre class="rounded")
+                  else
+                    span(class="text-gray-400 italic") Sin imagen
+                td(class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-3 flex")
+                  a(href=`/admin/productos/${p.id}/editar` class="text-indigo-600 hover:text-indigo-900 font-medium") Editar
+                  form(method="POST" action=`/admin/productos/${p.id}/eliminar` class="inline")
+                    input(type="hidden" name="_csrf" value=csrfToken)
+                    button(type="submit" class="text-red-600 hover:text-red-900 font-medium" onclick="return confirm('¿Eliminar este producto?')") Eliminar
+    else
+      div(class="bg-white shadow rounded-lg p-8 text-center")
+        p(class="text-gray-600 mb-4") No hay productos registrados.
+        a(href="/admin/productos/nuevo" class="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-md transition") 
+          span(class="mr-2") +
+          | Crear el primer producto

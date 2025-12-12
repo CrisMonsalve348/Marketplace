@@ -1,0 +1,69 @@
+extends ../layout/app.pug
+
+block content
+  .productos-page
+    h1= pagina
+    
+    .filtros-section
+      form.filtros-form(method="GET" action="/productos")
+        .filtro-grupo
+          label(for="buscar") Buscar
+          input(type="text" id="buscar" name="buscar" placeholder="Nombre o descripción..." value=(filtros && filtros.buscar) || "")
+        
+        .filtro-grupo
+          label(for="categoria") Categoría
+          select(id="categoria" name="categoria")
+            option(value="") Todas las categorías
+            each cat in categorias
+              option(value=cat.id selected=(filtros && filtros.categoria == cat.id))= cat.nombre
+        
+        .filtro-grupo
+          label(for="precioMin") Precio mínimo
+          input(type="number" id="precioMin" name="precioMin" placeholder="0" step="1000" value=(filtros && filtros.precioMin) || "")
+        
+        .filtro-grupo
+          label(for="precioMax") Precio máximo
+          input(type="number" id="precioMax" name="precioMax" placeholder="9999999" step="1000" value=(filtros && filtros.precioMax) || "")
+        
+        .filtro-grupo
+          label(for="orden") Ordenar por
+          select(id="orden" name="orden")
+            option(value="reciente" selected=(!(filtros && filtros.orden) || filtros.orden === 'reciente')) Más recientes
+            option(value="nombre" selected=(filtros && filtros.orden === 'nombre')) Nombre (A-Z)
+            option(value="precioAsc" selected=(filtros && filtros.orden === 'precioAsc')) Precio menor a mayor
+            option(value="precioDesc" selected=(filtros && filtros.orden === 'precioDesc')) Precio mayor a menor
+        
+        .filtro-acciones
+          button(type="submit") Aplicar filtros
+          a(href="/productos") Limpiar filtros
+    
+    if productos.length
+      .productos-grid
+        each producto in productos
+          .producto-card
+            if producto.imagen_principal
+              a(href=`/productos/${producto.id}`)
+                img(src=producto.imagen_principal alt=producto.nombre class="producto-imagen")
+            else
+              div.sin-imagen
+            
+            h2.producto-nombre
+              a(href=`/productos/${producto.id}`)= producto.nombre
+            
+            if producto.descripcion
+              p.producto-descripcion= producto.descripcion.substring(0, 100) + (producto.descripcion.length > 100 ? '...' : '')
+            
+            .producto-precio
+              span.precio $#{parseFloat(producto.precio).toFixed(2)}
+            
+            .producto-stock
+              if producto.estado === 'no disponible'
+                span.badge-no-disponible No disponible
+              else if producto.stock > 0
+                span.stock-disponible Stock disponible: #{producto.stock}
+              else
+                span.sin-stock Sin stock
+            
+            a.btn-ver-detalle(href=`/productos/${producto.id}`) Ver detalle
+    else
+      p.sin-productos No hay productos que coincidan con tu búsqueda.

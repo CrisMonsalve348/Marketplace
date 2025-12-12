@@ -16,12 +16,12 @@ const emailRegistro = async (datos) => {
   // Enviar el correo
 
   await transport.sendMail({
-    from: "MarketPlaceOLX.com",
+    from: "OpenTrade.com",
     to: email,
-    subject: "Confirma tu cuenta en MarketPlaceOLX",
-    text: "Confirma tu cuenta en MarketPlaceOLX",
+    subject: "Confirma tu cuenta en OpenTrade",
+    text: "Confirma tu cuenta en OpenTrade",
     html: `
-    <p>Hola ${nombre}, comprueba tu cuenta en MarketPlace</p>
+    <p>Hola ${nombre}, comprueba tu cuenta en OpenTrade</p>
     
     <p>Tu cuenta ya esta lista, solo debes confirmarla en el siguiente enlace: 
     <a href="${process.env.BACKEND_URL}:${

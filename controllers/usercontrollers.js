@@ -45,9 +45,11 @@ const registrar = async(req, res) =>{
     .run(req);
 
   await check("role")
-  .isIn(["admin", "cliente"])
-  .withMessage("Debe seleccionar un rol")
-  .run(req)
+    .notEmpty()
+    .withMessage("Debes seleccionar un rol")
+    .isIn(["cliente", "admin"])
+    .withMessage("Rol inválido")
+    .run(req);
 
   let resultado = validationResult(req);
    // Verificar que el resultado este vacio
@@ -128,7 +130,9 @@ const confirmar = async (req, res) => {
 
   res.render("auth/confirmar-cuenta", {
     tituloPagina: "Cuenta confirmada",
-    mensaje: "La cuenta se confirmó correctamente",
+    mensaje: "La cuenta se confirmó correctamente. Inicia sesión para continuar.",
+    enlace: "/auth/login",
+    textoEnlace: "Ir a Login"
   });
 };
 
@@ -205,7 +209,7 @@ const autenticar= async(req,res)=>{
       httpOnly: true,
       
     })
-    .redirect("/dashboard");
+    .redirect(usuario.role === "admin" ? "/dashboard" : "/");
 
 
   }
@@ -340,10 +344,12 @@ const nuevoPassword = async (req, res) => {
 
 const formularioeditarperfil=(req, res)=>{
   
-  res.render("auth/editar-perfil", {
+  const vista = req.usuario.role === 'admin' ? 'auth/editar-perfil-admin' : 'auth/editar-perfil';
+  
+  res.render(vista, {
     tituloPagina: "Editar perfil de usuario",
     csrfToken: req.csrfToken(),
-     usuario: req.usuario 
+    usuario: req.usuario
   });   
 
 };

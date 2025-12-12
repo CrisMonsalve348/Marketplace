@@ -1,0 +1,46 @@
+extends ./layout/app.pug
+
+block content
+  h1 Bienvenido a OpenTrade
+  
+  if usuario
+    p ¡Hola, #{usuario.nombre}!
+    .user-actions
+      a(href="/productos") Ver productos
+      a(href="/auth/editar-perfil") Mi perfil
+      a(href="/auth/logout") Cerrar sesión
+  else
+    p Descubre nuestros productos y servicios
+    .guest-actions
+      a(href="/auth/registro") Registrarse
+      a(href="/auth/login") Iniciar sesión
+  
+  if productos.length
+    section.productos-destacados
+      h2 Productos destacados
+      .productos-grid
+        each producto in productos
+          .producto-card
+            if producto.imagen_principal
+              a(href=`/productos/${producto.id}`)
+                img(src=producto.imagen_principal alt=producto.nombre class="producto-imagen")
+            
+            h3.producto-nombre
+              a(href=`/productos/${producto.id}`)= producto.nombre
+            
+            if producto.descripcion
+              p.producto-descripcion= producto.descripcion.substring(0, 80) + '...'
+            
+            .producto-precio
+              span.precio $#{parseFloat(producto.precio).toFixed(2)}
+            
+            .producto-stock
+              if producto.stock > 0
+                span.stock-disponible Stock: #{producto.stock}
+              else
+                span.sin-stock Sin stock
+            
+            a.btn-ver-detalle(href=`/productos/${producto.id}`) Ver detalle
+    
+    .ver-todos
+      a(href="/productos" class="btn-primary") Ver todos los productos

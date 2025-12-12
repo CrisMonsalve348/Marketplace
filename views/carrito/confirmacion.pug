@@ -1,0 +1,49 @@
+extends ../layout/app.pug
+
+block content
+  .container.my-5
+    .alert.alert-success.text-center
+      h2 ✓ Pedido Confirmado
+      p Tu pedido ha sido creado exitosamente.
+
+    .row
+      .col-md-8.mx-auto
+        .card
+          .card-body
+            .row.mb-4
+              .col-md-6
+                h6.text-muted NÚMERO DE PEDIDO
+                h3.text-primary= `#${pedido.id}`
+              .col-md-6.text-end
+                h6.text-muted FECHA
+                p= new Date(pedido.fecha_creacion).toLocaleDateString('es-CO')
+
+            hr
+
+            .row.mb-4
+              .col-md-6
+                h6.text-muted DIRECCIÓN DE ENVÍO
+                p= pedido.direccion_envio
+              .col-md-6
+                h6.text-muted MÉTODO DE PAGO
+                p= pedido.metodo_pago === 'contra_entrega' ? 'Contra Entrega' : pedido.metodo_pago === 'tarjeta' ? 'Tarjeta' : 'Transferencia'
+
+            hr
+
+            .mb-4
+              h6.text-muted ESTADO DEL PEDIDO
+              .progress
+                .progress-bar.bg-info(style="width: 25%;") Pendiente
+
+            hr
+
+            .d-flex.justify-content-between.fs-5.mb-3
+              strong Total del Pedido:
+              strong.text-success= `$${total}`
+
+            .alert.alert-info
+              p Te enviaremos un email de confirmación con los detalles de tu pedido. Puedes seguir el estado en tu panel de usuario.
+
+    .text-center.mt-4
+      a.btn.btn-primary(href="/") Volver al Inicio
+      a.btn.btn-secondary.ms-2(href="/productos") Seguir Comprando

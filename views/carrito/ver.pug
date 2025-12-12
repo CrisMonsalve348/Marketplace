@@ -1,0 +1,112 @@
+extends ../layout/app.pug
+
+block content
+  .container.my-5
+    h1 Mi Carrito de Compras
+    input(type="hidden" id="csrfToken" name="_csrf" value=csrfToken)
+    
+    if items.length > 0
+      .table-responsive
+        table.table.table-hover
+          thead.table-dark
+            tr
+              th Producto
+              th Precio
+              th Cantidad
+              th Subtotal
+              th Acciones
+          tbody
+            each item in items
+              tr
+                td
+                  if item.Producto.imagen_principal
+                    img(src=`/uploads/productos/${item.Producto.imagen_principal}`, alt=item.Producto.nombre, width="50")
+                  span.ms-2= item.Producto.nombre
+                td $#{parseFloat(item.precio_unitario).toFixed(2)}
+                td
+                  input.form-control(type="number", min="1", value=item.cantidad, data-item-id=item.id, data-stock=item.Producto.stock, data-cantidad=item.cantidad, style="width: 80px;")
+                td $#{(parseFloat(item.precio_unitario) * item.cantidad).toFixed(2)}
+                td
+                  button.btn.btn-sm.btn-danger.btn-eliminar(data-item-id=item.id, type="button") Eliminar
+      
+      .row.mt-4
+        .col-md-8
+        .col-md-4
+          .card
+            .card-body
+              h5.card-title Resumen
+              .d-flex.justify-content-between
+                span Subtotal:
+                strong $#{subtotal}
+              .d-flex.justify-content-between.mt-2
+                span Total:
+                strong.text-primary= `$${total}`
+              
+              a.btn.btn-primary.btn-block.mt-3(href="/carrito/checkout") Ir a Checkout
+              a.btn.btn-secondary.btn-block.mt-2(href="/productos") Seguir Comprando
+
+    else
+      .alert.alert-info
+        p Tu carrito está vacío.
+        a.btn.btn-primary(href="/productos") Ir al catálogo
+
+  script.
+    const csrfToken = document.getElementById('csrfToken')?.value || '';
+
+    // Actualizar cantidad
+    document.querySelectorAll('input[type="number"]').forEach(input => {
+      input.addEventListener('change', async (e) => {
+        const cantidad = e.target.value;
+        const itemId = e.target.dataset.itemId;
+        
+        try {
+          const response = await fetch('/carrito/actualizar', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'CSRF-Token': csrfToken
+            },
+            body: JSON.stringify({ item_id: itemId, cantidad })
+          });
+          
+          if (response.ok) {
+            location.reload();
+          } else {
+            const data = await response.json();
+            alert('Error: ' + data.error);
+            e.target.value = e.target.dataset.cantidad;
+          }
+        } catch (error) {
+          console.error('Error:', error);
+          alert('Error actualizando cantidad');
+        }
+      });
+    });
+    
+    // Eliminar item
+    document.querySelectorAll('.btn-eliminar').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        if (!confirm('¿Estás seguro?')) return;
+        
+        const itemId = e.currentTarget.dataset.itemId;
+        
+        try {
+          const response = await fetch(`/carrito/${itemId}`, {
+            method: 'DELETE',
+            headers: {
+              'CSRF-Token': csrfToken
+            }
+          });
+          
+          if (response.ok) {
+            e.currentTarget.closest('tr').remove();
+            location.reload();
+          } else {
+            alert('Error eliminando item');
+          }
+        } catch (error) {
+          console.error('Error:', error);
+          alert('Error eliminando item');
+        }
+      });
+    });

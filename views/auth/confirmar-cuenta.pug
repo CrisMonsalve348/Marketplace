@@ -1,14 +1,29 @@
 
+
 extends ../layout/index
 
 block contenido
-    
-    h1 MarketPlaceOLX 
-            
-    h2=tituloPagina
+    // Contenedor Principal Centrado
+    div(class="min-h-screen bg-white flex items-center justify-center px-4 sm:px-6 lg:px-8")
+            div(class="max-w-md w-full mx-auto text-center")
+                
+                // Icono de éxito
+                div(class="mx-auto flex items-center justify-center h-20 w-20 rounded-full bg-green-100 mb-6")
+                    svg(class="h-12 w-12 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24")
+                        path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7")
+                
+                h1(class="text-3xl font-bold text-gray-900 mb-2")= tituloPagina || "¡Cuenta confirmada!"
+                
+                if mensaje
+                    p(class="text-lg text-gray-600 mb-8")= mensaje
+                else
+                    p(class="text-lg text-gray-600 mb-8") Tu cuenta ha sido activada correctamente
 
-    div
-        p class= mensaje 
-
-        if !error
-            a(href="/auth/login") Ya puedes iniciar sesion
+                // Botones de acción
+                div(class="space-y-4")
+                    if enlace && textoEnlace
+                        a(class="inline-flex items-center justify-center w-full bg-orange-600 hover:bg-orange-700 text-white font-semibold py-3 rounded-lg transition duration-200" href=enlace)= textoEnlace
+                    else
+                        a(class="inline-flex items-center justify-center w-full bg-orange-600 hover:bg-orange-700 text-white font-semibold py-3 rounded-lg transition duration-200" href="/auth/login") Iniciar sesión ahora
+                    
+                    a(class="inline-flex items-center justify-center w-full text-orange-600 hover:text-orange-700 font-medium" href="/") Ir al inicio

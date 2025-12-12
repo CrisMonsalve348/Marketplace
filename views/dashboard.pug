@@ -1,4 +1,30 @@
 extends ./layout/admin
 
-block contenido
-    h1 si 
+block content
+  div(class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6")
+    h1.text-2xl.font-bold.mb-6 Panel de Administración
+
+    div(class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6")
+      // Productos
+      .bg-white.shadow.rounded-lg.p-6.text-center
+        h5.text-lg.font-medium.mb-2 Productos
+        p.text-sm.text-gray-600.mb-4 Gestiona el catálogo
+        a(class="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700" href="/admin/productos") Ir al Panel
+
+      // Pedidos
+      .bg-white.shadow.rounded-lg.p-6.text-center
+        h5.text-lg.font-medium.mb-2 Pedidos
+        p.text-sm.text-gray-600.mb-4 Gestiona las órdenes
+        a(class="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700" href="/admin/pedidos") Ir al Panel
+
+      // Usuarios
+      .bg-white.shadow.rounded-lg.p-6.text-center
+        h5.text-lg.font-medium.mb-2 Usuarios
+        p.text-sm.text-gray-600.mb-4 Gestiona usuarios
+        a(class="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700" href="/auth/gestionar-usuarios") Ir al Panel
+
+      // Categorías
+      .bg-white.shadow.rounded-lg.p-6.text-center
+        h5.text-lg.font-medium.mb-2 Categorías
+        p.text-sm.text-gray-600.mb-4 Gestiona categorías
+        a(class="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700" href="/admin/categorias") Ir al Panel

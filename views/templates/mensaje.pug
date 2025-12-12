@@ -2,8 +2,13 @@ extends ../layout/index
 
 block contenido
     
-        h1 Bienes Raices 
-            
+        h1 OpenTrade 
+            span OLX
         h2= tituloPagina
 
         p= mensaje
+        
+        if enlace && textoEnlace
+            a.btn(href=enlace)= textoEnlace
+        else
+            a.btn(href="/") Volver al inicio
