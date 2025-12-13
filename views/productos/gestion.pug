@@ -2,6 +2,7 @@ extends ../layout/admin.pug
 
 block content
   div(class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6")
+    input(type="hidden" id="csrfToken" value=csrfToken)
     
     div(class="flex items-center justify-between mb-8")
       h1(class="text-3xl font-bold text-gray-900") Gestionar Productos
@@ -65,10 +66,8 @@ block content
                 div(class="flex gap-2")
                   a(href=`/admin/productos/${producto.id}/editar` class="flex-1 inline-flex items-center justify-center px-4 py-2 border border-orange-200 text-orange-700 text-sm font-semibold rounded-full hover:bg-orange-50 transition")
                     | Editar
-                  form(method="POST" action=`/admin/productos/${producto.id}/eliminar` class="flex-1")
-                    input(type="hidden" name="_csrf" value=csrfToken)
-                    button(type="submit" class="w-full inline-flex items-center justify-center px-4 py-2 border border-red-200 text-red-700 text-sm font-semibold rounded-full hover:bg-red-50 transition cursor-pointer" onclick="return confirm('¿Estás seguro de eliminar este producto?')")
-                      | Eliminar
+                  button(class="flex-1 inline-flex items-center justify-center px-4 py-2 border border-red-200 text-red-700 text-sm font-semibold rounded-full hover:bg-red-50 transition cursor-pointer btn-eliminar" data-id=producto.id)
+                    | Eliminar
 
     else
       div(class="bg-white rounded-xl shadow-md p-8 text-center")
@@ -85,3 +84,40 @@ block content
             a(href="/admin/productos/nuevo" class="inline-flex items-center gap-2 px-4 py-2 bg-orange-600 text-white font-medium rounded-full hover:bg-orange-700 transition") 
               span +
               | Crear el primer producto
+
+block scripts
+  script.
+    document.querySelectorAll('.btn-eliminar').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        
+        if (!confirm('¿Estás seguro de que deseas eliminar este producto?')) {
+          return;
+        }
+        
+        const productoId = btn.dataset.id;
+        const csrfToken = document.getElementById('csrfToken')?.value || '';
+        
+        try {
+          const response = await fetch(`/admin/productos/${productoId}/eliminar`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'CSRF-Token': csrfToken
+            }
+          });
+          
+          const data = await response.json();
+          
+          if (data.success) {
+            alert('Producto eliminado correctamente');
+            location.reload();
+          } else {
+            alert('Error: ' + (data.error || 'Error eliminando el producto'));
+          }
+        } catch (error) {
+          console.error('Error:', error);
+          alert('Error eliminando el producto');
+        }
+      });
+    });

@@ -568,11 +568,49 @@ const verDetalleAdmin = async (req, res) => {
   }
 };
 
+// Eliminar producto
+const eliminarProducto = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const producto = await Producto.findByPk(id);
+
+    if (!producto) {
+      return res.status(404).json({
+        error: "Producto no encontrado",
+      });
+    }
+
+    // Eliminar imagen si existe
+    if (producto.imagen_principal) {
+      const imagenPath = path.join(process.cwd(), "public", producto.imagen_principal);
+      if (fs.existsSync(imagenPath)) {
+        fs.unlinkSync(imagenPath);
+      }
+    }
+
+    // Eliminar producto de la base de datos
+    await producto.destroy();
+
+    console.log("Producto eliminado:", id);
+    return res.json({
+      success: true,
+      message: "Producto eliminado correctamente",
+    });
+  } catch (error) {
+    console.error("Error eliminando producto:", error);
+    return res.status(500).json({
+      error: "Error eliminando el producto",
+    });
+  }
+};
+
 export { 
   formularioNuevo, 
   guardarNuevo,
   formularioEditar,
   actualizarProducto,
+  eliminarProducto,
   listadoPublico, 
   listadoAdmin, 
   verDetalle,

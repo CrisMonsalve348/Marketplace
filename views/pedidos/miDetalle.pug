@@ -65,16 +65,22 @@ block content
                       if item.Producto && item.Producto.imagen_principal
                         img.w-16.h-16.rounded-lg.object-cover(src=item.Producto.imagen_principal alt=item.Producto.nombre)
                       else
-                        .w-16.h-16.rounded-lg.bg-gray-200
+                        .w-16.h-16.rounded-lg.bg-gray-200.flex.items-center.justify-center
+                          span.text-gray-400.text-xs Sin imagen
                       div
                         p.font-medium.text-gray-900
-                          = item.Producto ? item.Producto.nombre : 'Producto no disponible'
+                          if item.Producto
+                            = item.Producto.nombre
+                          else
+                            span.text-gray-500 Producto no disponible
+                        if !item.Producto
+                          p.text-xs.text-gray-500 (Producto eliminado del catálogo)
                   td.px-6.py-4.text-center.text-gray-900
                     = item.cantidad
                   td.px-6.py-4.text-right.text-gray-900
-                    = `$${Math.trunc(item.precio_unitario).toLocaleString('es-CO')}`
+                    = `$${Math.trunc(Number(item.precio_unitario) || 0).toLocaleString('es-CO')}`
                   td.px-6.py-4.text-right.font-medium.text-gray-900
-                    = `$${Math.trunc(item.subtotal).toLocaleString('es-CO')}`
+                    = `$${Math.trunc(Number(item.subtotal) || 0).toLocaleString('es-CO')}`
 
       // Resumen de costos
       .bg-white.rounded-xl.shadow-md.p-6

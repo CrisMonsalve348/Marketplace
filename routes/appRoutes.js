@@ -7,6 +7,7 @@ import {
   guardarNuevo,
   formularioEditar,
   actualizarProducto,
+  eliminarProducto,
   listadoPublico,
   listadoAdmin,
   verDetalle,
@@ -34,6 +35,7 @@ router.get("/admin/productos/nuevo", protegerRutaadmin, formularioNuevo);
 router.post("/admin/productos/nuevo", protegerRutaadmin, guardarNuevo);
 router.get("/admin/productos/:id/editar", protegerRutaadmin, formularioEditar);
 router.post("/admin/productos/:id/editar", protegerRutaadmin, actualizarProducto);
+router.post("/admin/productos/:id/eliminar", protegerRutaadmin, eliminarProducto);
 router.get("/admin/productos/:id/detalle", protegerRutaadmin, verDetalleAdmin);
 
 // Admin - Pedidos

@@ -86,16 +86,26 @@ const verDetallePedido = async (req, res) => {
       where: { pedido_id: id },
     });
 
-    // Cargar productos para cada item
+    // Cargar productos para cada item (para mostrar info extra como imagen)
+    // Pero usar siempre los precios guardados en PedidoItem, no los del producto actual
     for (let item of items) {
-      item.Producto = await Producto.findByPk(item.producto_id, {
-        attributes: ["id", "nombre", "imagen_principal", "precio"]
+      const producto = await Producto.findByPk(item.producto_id, {
+        attributes: ["id", "nombre", "imagen_principal"]
       });
+      item.Producto = producto || null;
+      
+      // Asegurar que los precios vienen del PedidoItem (los guardados en el momento de la compra)
+      if (!item.precio_unitario) {
+        item.precio_unitario = 0;
+      }
+      if (!item.subtotal) {
+        item.subtotal = 0;
+      }
     }
 
-    // Calcular subtotal
+    // Calcular subtotal usando SIEMPRE los precios guardados en el pedido
     const subtotal = items.reduce(
-      (sum, item) => sum + parseFloat(item.subtotal || 0),
+      (sum, item) => sum + (parseFloat(item.subtotal) || 0),
       0
     );
 
@@ -148,14 +158,7 @@ const cambiarEstado = async (req, res) => {
       });
     }
 
-    const pedido = await Pedido.findByPk(id, {
-      include: [
-        {
-          model: PedidoItem,
-          include: [{ model: Producto }],
-        },
-      ],
-    });
+    const pedido = await Pedido.findByPk(id);
 
     if (!pedido) {
       return res.status(404).json({
@@ -171,9 +174,14 @@ const cambiarEstado = async (req, res) => {
       estadoAnterior !== "enviado" &&
       estadoAnterior !== "cancelado"
     ) {
+      // Cargar items del pedido
+      const items = await PedidoItem.findAll({
+        where: { pedido_id: id },
+      });
+
       // Restaurar stock para cada item del pedido
-      for (const item of pedido.PedidoItems) {
-        const producto = item.Producto;
+      for (const item of items) {
+        const producto = await Producto.findByPk(item.producto_id);
         if (producto) {
           producto.stock += item.cantidad;
           

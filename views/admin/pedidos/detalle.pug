@@ -68,16 +68,19 @@ block content
                         else
                           div(class="w-12 h-12 bg-gray-200 rounded flex items-center justify-center")
                             span(class="text-gray-400 text-xs") Sin imagen
-                        if item.Producto
-                          span(class="font-medium text-gray-900")= item.Producto.nombre
-                        else
-                          span(class="font-medium text-gray-500") Producto no disponible
+                        div
+                          if item.Producto
+                            span(class="font-medium text-gray-900")= item.Producto.nombre
+                          else
+                            div
+                              span(class="font-medium text-gray-500") Producto no disponible
+                              p(class="text-xs text-gray-400") (Eliminado del catálogo)
                     td(class="px-6 py-4 text-center")
                       p(class="font-medium text-gray-900")= item.cantidad
                     td(class="px-6 py-4 text-center")
-                      p(class="font-medium text-gray-900") $#{Math.trunc(item.precio_unitario).toLocaleString('es-CO')}
+                      p(class="font-medium text-gray-900") $#{Math.trunc(Number(item.precio_unitario) || 0).toLocaleString('es-CO')}
                     td(class="px-6 py-4 text-right")
-                      p(class="font-bold text-orange-600") $#{Math.trunc(item.subtotal).toLocaleString('es-CO')}
+                      p(class="font-bold text-orange-600") $#{Math.trunc(Number(item.subtotal) || 0).toLocaleString('es-CO')}
       
       // Sidebar - Cambiar estado
       div(class="lg:col-span-1")
